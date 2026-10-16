@@ -62,8 +62,9 @@ fn measure(binary: &[u8], label: &str, path: &str, input: &ReceiveInput) -> Resu
     let cycles: u64 = session.segments.iter().map(|s| s.cycles as u64).sum();
     let padded: u64 = session.segments.iter().map(|s| 1u64 << s.po2).sum();
     println!("| {label} | {path} | {cycles} | {padded} |");
+    // `PROVE_ONLY=AttestPrivate` (any part of a label) proves only the matching actions.
     #[cfg(feature = "prove")]
-    if path.starts_with("private") {
+    if path.starts_with("private") && std::env::var("PROVE_ONLY").map_or(true, |only| label.contains(&only)) {
         prove(binary, label, input)?;
     }
     Ok(handle_message(input))

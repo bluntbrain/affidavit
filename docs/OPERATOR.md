@@ -13,7 +13,7 @@ anyone can catch the instance up later, within its weak-subjectivity period.
 |---|---|---|
 | Ethereum | a beacon API endpoint (light-client routes) and an execution endpoint with `eth_getProof`, reached through the Logos Ethereum core module | same |
 | LEZ | 12M to 15M gas per update, over at least two transactions | about 0.49M gas per update, in one transaction |
-| Compute | negligible (native verification is about 40 ms per update) | a RISC Zero prover: 15.9M padded cycles per update, about 19 minutes on an M2 Pro CPU (*estimate*), minutes on a GPU |
+| Compute | negligible (native verification is about 40 ms per update) | a RISC Zero prover and 16 GB of memory: 15.9M padded cycles per update, minutes on a GPU, about 20 to 40 minutes on a recent laptop CPU (*estimate*) |
 | Standing | none: no registration, no allowlist, no stake, nothing on Ethereum | none |
 | State | the committee keys behind each tracked root (about 25 KB per period), recoverable from any beacon node | same |
 
@@ -49,7 +49,7 @@ daemon avoids it with three rules (`crates/core/src/operator.rs`):
    before submitting. If it already moved, stop (#R9).
 3. **Hint (private-verifier path only).** When starting a proof, announce
    "proving update *u*, ETA *t*" over Logos Messaging. Others that see the hint wait until
-   *t* (capped at 30 minutes) before checking again. A hint is never trusted: a silent or
+   *t* (capped at 45 minutes) before checking again. A hint is never trusted: a silent or
    lying announcer costs at most the cap in delay, never safety, and nobody needs
    permission to ignore hints.
 
@@ -65,16 +65,16 @@ Simulated over 20,000 updates with five operators of different latency and hardw
 | deferral window 120 s | 23% / 23% / 20% / 19% / 14% | 24.5 | 26 s / 64 s |
 | deferral window 300 s | 21% / 21% / 20% / 20% / 18% | 10.3 | 49 s / 146 s |
 
-**Private-verifier path** (proving times from the measured 15.9M padded cycles: A, B, E
-prove on GPUs in 1.5 to 2.5 minutes; C and D on laptop CPUs in about 19 and 22):
+**Private-verifier path** (15.9M padded cycles per update: A, B, E prove on GPUs in 1.5
+to 2.5 minutes; C and D on laptop CPUs in 25 and 35):
 
 | strategy | share of updates paid (A, B, C, D, E) | wasted submissions /100 | wasted proofs /100 | median / p95 latency |
 |---|---|---:|---:|---|
 | submit on sight | 0% / 0% / 0% / 0% / 100% | 0.0 | 400.0 | 106 s / 108 s |
 | deferral window 600 s | 35% / 28% / 0% / 0% / 37% | 2.7 | 146.5 | 245 s / 500 s |
-| deferral window 1800 s | 34% / 31% / 1% / 0% / 34% | 0.9 | 81.0 | 490 s / 1242 s |
-| deferral 600 s + proving hint | 21% / 20% / 20% / 20% / 19% | 0.0 | 0.0 | 302 s / 1491 s |
-| deferral 1800 s + proving hint | 20% / 20% / 20% / 20% / 19% | 0.0 | 0.0 | 664 s / 1881 s |
+| deferral window 1800 s | 34% / 32% / 0% / 0% / 34% | 0.9 | 81.9 | 490 s / 1252 s |
+| deferral 600 s + proving hint | 21% / 20% / 20% / 20% / 19% | 0.0 | 0.0 | 302 s / 2254 s |
+| deferral 1800 s + proving hint | 20% / 20% / 20% / 20% / 19% | 0.0 | 0.0 | 664 s / 2569 s |
 
 Reading it: on the public path a 300 s window spreads the cost evenly and wastes about one
 submission in ten updates, at a median latency under a minute. On the private path the

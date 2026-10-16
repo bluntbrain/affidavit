@@ -55,16 +55,34 @@ so an update at the 342/512 minimum costs about 2M cycles more.
 So the private-verifier path costs the sequencer **25 to 30 times less** per update than
 the public one, and fits one transaction in one block.
 
-## Proving time (estimates until M0 measures them on target hardware)
+## Proving time
 
-LEZ's own `cycle_bench` measures CPU proving at about 73 µs per padded cycle on an Apple
-M2 Pro with no GPU, and the privacy-preserving composition at 18 to 25 s.
+Measured: the program's `AttestPrivate` action, proven with RISC Zero 3.0.5's CPU prover
+into a succinct receipt and verified against the program's image id, on a 4-vCPU cloud VM
+(Xeon, 2.8 GHz, 15 GB RAM, no GPU; [raw](raw/prove-lez-program-2026-10-16.txt)):
 
-| What | Padded cycles | M2 Pro CPU (from LEZ's rate) | GPU |
-|---|---:|---:|---|
-| Update with handoff, private verifier (operator) | 15.9M | **about 19 min** | about 1.5 to 2.5 min, *assumed* |
-| Finality update, private verifier (operator) | 13.6M | **about 17 min** | same |
-| Private consumer attestation (user's laptop) | 1.05M | **about 1.5 to 2 min** including composition | — |
+```console
+cd zkvm/host && PROVE_ONLY=AttestPrivate CARGO_TARGET_DIR=target-prove cargo run --release --features prove --bin measure_lez
+```
+
+| Proof | Segments | Time | Receipt | Peak memory |
+|---|---:|---:|---:|---:|
+| `AttestPrivate`, native ETH transfer (a private consumer's proof) | 1 (2^20 cycles) | **495 s** | succinct, **222,668 bytes** | 9.4 GB |
+
+The receipt matches the roughly 224 KB of proof LEZ charges storage gas for. The rest is
+derived from that measurement and from LEZ's own `cycle_bench` (about 73 µs per padded
+cycle on an Apple M2 Pro CPU before recursion, and 18 to 25 s for the privacy-preserving
+composition); M0 measures it on target hardware:
+
+| What | Padded cycles | 4-vCPU VM | Recent laptop CPU | GPU |
+|---|---:|---:|---:|---|
+| Private consumer attestation | 1.05M (1 segment) | 8.3 min, *measured* | about 2 to 3 min, *estimate* | seconds, *assumed* |
+| Update with handoff, private verifier | 15.9M (16 segments) | about 2.5 h, *extrapolated* | about 20 to 40 min, *estimate* | 1.5 to 2.5 min, *assumed* |
+| Finality update, private verifier | 13.6M (14 segments) | about 2 h, *extrapolated* | about 17 to 35 min, *estimate* | same |
+
+So an operator on the private path needs a GPU, a fast desktop or a proving service
+(proving is trustless to outsource) to keep an hourly cadence; any machine with 16 GB of
+memory keeps up with the one handoff a day that an instance cannot do without.
 
 ## Verification core, phase by phase
 
@@ -149,7 +167,7 @@ that grows with the logarithm of the record count (16 hashes at 65,536 records).
 | Finality update on beacon nodes | within a slot or two | beacon nodes |
 | Operator deferral, proving and submission | median 49 s (public path, W = 300 s); median about 5 min (private path, W = 600 s with hints) | `OPERATOR.md` |
 | Inclusion on LEZ | one block | LEZ |
-| Consumer's own transaction | public: one block; private: proving about 1.5 to 2 min on a laptop | consumer |
+| Consumer's own transaction | public: one block; private: proving about 2 to 3 min on a laptop | consumer |
 
 About 15 to 25 minutes from an Ethereum event to a usable statement, dominated by
 Ethereum's own finality, when an operator runs at the recommended cadence. A consumer that
@@ -161,7 +179,7 @@ needs a block sooner than the hourly cadence can submit the update itself.
 |---|---|---|
 | Native verification of an update (CLI, daemon dry run; blst) | one core, under 100 MB | about 40 ms |
 | Update daemon, public path | committee keys, about 25 KB per period | negligible |
-| Update daemon, private path | a RISC Zero prover | about 19 min per update on an M2 Pro CPU (*estimate*), minutes on a GPU |
+| Update daemon, private path | a RISC Zero prover, 16 GB of memory | minutes per update on a GPU, about 20 to 40 min on a recent laptop CPU (*estimate*) |
 
 ## In-program BLS versus a precompile (Performance #8)
 

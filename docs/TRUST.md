@@ -54,6 +54,16 @@ check (the instance cannot tell). Every consumer that acts on statements under h
 of that period is exposed. It cannot rewrite headers the instance already recorded, and
 the signed fabricated header is public evidence of the collusion.
 
+**What the program takes from a committee's state, under the same assumption.** The next
+committee's 512 keys and its aggregate key come from the attested beacon state, which an
+honest supermajority signs only if it is canonical. In a canonical state every key passed
+`KeyValidate` with a proof of possession when its validator joined, and the aggregate is
+the sum of the 512 keys. So the program skips per-key subgroup checks and takes the
+signers' key as the aggregate minus the non-signers (`DECISIONS.md` D3). A captured
+committee could hand off to a committee that breaks either property, but a captured
+committee can already sign anything; neither shortcut adds a way to forge a statement
+without capturing a committee first.
+
 **What consumers do about it** (Verification Security #4): bound what any one period can
 cost them. A bridge caps deposits minted per period and in total, keeps a freeze
 authority that can stop minting when two instances or an instance and the honest chain

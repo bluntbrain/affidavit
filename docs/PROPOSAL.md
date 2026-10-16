@@ -59,16 +59,18 @@ the RFP lists (fabricated chain, 341/512 signatures, a foreign committee, tamper
 replays, other networks) with a typed error code. `cargo run -p affidavit-cli -- demo`
 shows all of it in one run. The LEZ program is written for the actor model on LEZ `main`;
 driven through LEZ's own message types across all the mainnet updates, it ends in exactly
-the state the native light client reaches, and its binary is measured action by action in
-the RISC Zero executor.
+the state the native light client reaches. Its binary is measured action by action in the
+RISC Zero executor, and a private consumer attestation is proven for real into a
+222,668-byte succinct receipt that verifies against the program's image id.
 
 Two design choices matter most for LEZ in particular. First, verification is separated
 from application, so the 15M-cycle update check can run in a privately placed actor whose
-execution the submitter proves, while the instance stays public: **one transaction at about
-0.49M gas per update**, where verifying publicly costs 12M to 15M gas split over at
-least two transactions under the 10M cap, and no BLS12-381 precompile is needed. Second, private
-consumers prove their header is in the instance's header accumulator, so the only thing
-they disclose is a root every consumer shares, which is what Functionality #8 asks for.
+execution the submitter proves, while the instance stays public: **one transaction at
+about 0.49M gas per update**, where verifying publicly costs 12M to 15M gas split over at
+least two transactions under the 10M cap, and no BLS12-381 precompile is needed. Second,
+private consumers prove their header is in the instance's header accumulator, so the only
+thing they disclose is a root every consumer shares, which is what Functionality #8 asks
+for.
 
 ## Technical Approach
 
@@ -101,11 +103,11 @@ above LEZ's 10M per-transaction cap. LEZ runs private actors uncapped and proven
 sender, with the sequencer verifying one receipt at a fixed 409,764 gas. So the preferred
 path places `Verify` privately: one transaction, about 0.49M gas including `Apply` (57K
 cycles) and the header record (20K), 25 to 30 times less than verifying publicly. The
-submitter proves 15.9M padded cycles: about 19 minutes on an M2 Pro CPU at LEZ's
-benchmarked rate, minutes on a GPU. The fallback, if testnet 0.4 does not allow that
-placement, splits the public verification along the pairing's seams. M0 settles this on
-testnet first, and both paths are measured, since the comparison is the input to any
-precompile RFP (#P8).
+submitter proves 15.9M padded cycles: minutes on a GPU or through a proving service, and
+about 20 to 40 minutes on a recent laptop CPU (extrapolated from a measured proof). The
+fallback, if testnet 0.4 does not allow that placement, splits the public verification
+along the pairing's seams. M0 settles this on testnet first, and both paths are measured,
+since the comparison is the input to any precompile RFP (#P8).
 
 **Consumers.** Inclusion and the predicate run in the consumer's own transaction (#F7).
 Public consumers call a header record. Private consumers call a privately placed actor
@@ -114,8 +116,8 @@ the instance, which answers for its last 64 roots so private proofs survive a ne
 landing (#R11). Facts: accounts and storage (MPT), logs read from the receipt by index,
 and native ETH transfers by SSZ proof under the payload's `transactions_root`, sender
 recovery and the receipt's status. Measured: 0.6M to 1.3M cycles per attestation, within
-one transaction (#P1); a private attestation is about 1.5 to 2 minutes of proving on a
-laptop CPU (#P4). Statement identifiers depend on the chain and the fact, never on the
+one transaction (#P1); a private attestation proves in 8.3 minutes on a 4-vCPU cloud VM
+with 9.4 GB of memory, about 2 to 3 minutes on a recent laptop (#P4). Statement identifiers depend on the chain and the fact, never on the
 instance, so nullifiers survive migration to a replacement instance.
 
 **Reuse** ([assessment](https://github.com/bluntbrain/affidavit/blob/main/docs/REUSE.md)).
@@ -153,8 +155,11 @@ verification exposed through the core module.
    ships before mainnet schedules it.
 3. *Beacon light-client routes through the Logos Ethereum core module*: if the module does
    not expose them, I add them upstream rather than calling beacon nodes around it.
-4. *Private proving on a laptop (#P4)*: measured in M2 on a mid-range laptop and the
-   declared minimum spec.
+4. *Proving hardware (#P4, #P6).* A private update proves in minutes on a GPU but takes
+   tens of minutes on a laptop CPU, so operators on the private path use a GPU, a fast
+   desktop or a proving service (outsourcing a proof is trustless), while a private
+   attestation is already practical on a laptop. M0 and M2 measure both on real hardware
+   and declare the minimum spec (16 GB of memory today).
 
 ## Milestones, Payout and Timeline
 

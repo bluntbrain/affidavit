@@ -28,7 +28,7 @@ and the LEZ program has 5 more.
 | **Statements** | Predicates (`==`, `!=`, `<`, `<=`, `>`, `>=`) supplied by the consumer; chain binding; deterministic identifiers for nullifiers. |
 | **Attacks refused** | Fabricated chain with every Merkle path repaired, 341/512 signatures, attacker committee, tampered roots, missing finality, replays, skipped periods, stale checkpoint, other networks, uncovered predicates: one test each, with a typed error code. |
 | **LEZ program** | Handlers for LEZ `main`'s actor model (`lez/program`): instance at the PDA of its own configuration, permissionless verification by any actor, compare-and-swap apply, write-once header records, public and private consumer paths. Driven through LEZ's `ReceiveInput`/`Response` over all mainnet updates, it ends in the same state as the native client. |
-| **Measured cost** | The LEZ program binary itself, built for RISC Zero (upstream nightly + `build-std`, no `rzup`) and executed with LEZ's input framing: `Verify` 14.6M cycles, `Apply` 57K, a consumer attestation 0.6M to 1.3M. Placed privately, an update costs the sequencer about **0.49M gas, 25 to 30× less** than verifying it publicly. The signers' key is the committee's committed aggregate minus the witnessed non-signers, which took an update from 240M cycles to 13.7M. See [`docs/COSTS.md`](docs/COSTS.md). |
+| **Measured cost** | The LEZ program binary itself, built for RISC Zero (upstream nightly + `build-std`, no `rzup`) and executed with LEZ's input framing: `Verify` 14.6M cycles, `Apply` 57K, a consumer attestation 0.6M to 1.3M. Placed privately, an update costs the sequencer about **0.49M gas, 25 to 30× less** than verifying it publicly. A private consumer attestation is proven for real into a 222,668-byte succinct receipt (8.3 min on a 4-vCPU VM). The signers' key is the committee's committed aggregate minus the witnessed non-signers, which took an update from 240M cycles to 13.7M. See [`docs/COSTS.md`](docs/COSTS.md). |
 | **Operators** | Deferral, check-before-submit and proving hints, plus a contention simulation: five operators each pay about 20%, wasted submissions fall 30× on the public path, and wasted proofs fall from 400 to 0 per 100 updates on the private path. See [`docs/OPERATOR.md`](docs/OPERATOR.md). |
 
 ## The design in four points
@@ -98,9 +98,10 @@ through the Logos Ethereum core module in the grant's M3.
 ## What this prototype is not yet
 
 Not deployed to a LEZ testnet; the program's handlers are tested natively against LEZ's
-types rather than through a sequencer. Cycle counts come from the RISC Zero executor and
-nothing is proven yet, so proving times are estimates from LEZ's benchmarked rate. No
-Logos core module or update daemon yet (the submission policy and its simulation are). Receipts for the light-client fixture's block
+types rather than through a sequencer. Cycle counts come from the RISC Zero executor; one
+private action (a consumer attestation) is proven end to end, and the update's proving
+time is extrapolated from it. No Logos core module or update daemon yet (the submission
+policy and its simulation are). Receipts for the light-client fixture's block
 are not available offline, so the native-transfer demo proves inclusion and sender but not
 success; the receipt path is tested on other mainnet blocks. Gloas containers (Sepolia
 since 2026-10-06) are not in. These are the milestones in the proposal.

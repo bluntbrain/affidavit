@@ -1,0 +1,23 @@
+Real proof of a private action of the LEZ program binary (RISC Zero 3.0.5, CPU prover, ProverOpts::succinct).
+Machine: 4 vCPU cloud VM (Intel(R) Xeon(R) Processor @ 2.80GHz), 15 GB RAM, no GPU.
+Command: cd zkvm/host && PROVE_ONLY=AttestPrivate CARGO_TARGET_DIR=target-prove cargo run --release --features prove --bin measure_lez
+Built with --config 'profile.release.package.risc0-circuit-keccak-sys.opt-level=0' to save build time: the program
+never calls the keccak accelerator, so that circuit's prover is not exercised and the timing is unaffected.
+
+LEZ program binary (lee_core d7ba18f, actor model), RISC Zero executor 3.0.5, mainnet fixtures
+
+| action | runs | user cycles | padded cycles |
+|---|---|---:|---:|
+| Initialize (bootstrap check, once per instance) | public | 2523572 | 3145728 |
+| Verify (update with handoff) | private: proven by the submitter | 14583345 | 15859712 |
+| Apply (instance compare-and-swap) | public | 55296 | 131072 |
+| Record (write-once header record) | public | 19600 | 65536 |
+| Verify (finality update) | private: proven by the submitter | 12251079 | 13631488 |
+| Apply (instance compare-and-swap) | public | 58786 | 131072 |
+| Record (write-once header record) | public | 19600 | 65536 |
+| AttestRecord (native ETH transfer, public consumer) | public | 813571 | 1048576 |
+| AttestPrivate (native ETH transfer, private consumer) | private: proven by the user | 818024 | 1048576 |
+| CheckRoot (the private path's public crossing) | public | 27855 | 131072 |
+
+PEAK_RSS_MB 9379 WALL_S 499 EXIT 0
+PROOF | AttestPrivate (native ETH transfer, private consumer) | 495 s | 1 segments | succinct seal 222668 bytes | 4 threads |

@@ -35,7 +35,7 @@ struct Strategy {
 }
 
 const GOSSIP_MS: u64 = 1_000;
-const HINT_CAP_MS: u64 = 1_800_000;
+const HINT_CAP_MS: u64 = 2_700_000;
 
 #[derive(Default)]
 struct Totals {
@@ -191,10 +191,11 @@ fn main() {
     );
 
     // Private-verifier path: the operator first proves the update. The program's Verify is
-    // 14.6M cycles (15.9M padded, `zkvm/host` measure_lez); at LEZ's published CPU proving
-    // rate (73 us per padded cycle on an M2 Pro) that is about 19 minutes, and a GPU is
-    // assumed at about 1.5 to 2.5 minutes until M0 measures it.
-    let proving = [110_000, 135_000, 1_160_000, 1_330_000, 90_000];
+    // 14.6M cycles (15.9M padded, 16 segments, `zkvm/host` measure_lez). LEZ's published CPU
+    // rate (73 us per padded cycle on an M2 Pro, before recursion) gives 19 minutes; with
+    // recursion we take 25 and 35 minutes for the two laptops. GPUs are assumed at 1.5 to
+    // 2.5 minutes until M0 measures them.
+    let proving = [110_000, 135_000, 1_500_000, 2_100_000, 90_000];
     let private: Vec<Operator> = names
         .iter()
         .zip(latencies)
