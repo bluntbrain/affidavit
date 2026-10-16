@@ -190,9 +190,11 @@ fn main() {
         false,
     );
 
-    // Private-verifier path: the operator first proves the update (about 15M cycles): about
-    // two minutes on a GPU, about twenty on a laptop CPU.
-    let proving = [120_000, 150_000, 1_200_000, 1_400_000, 100_000];
+    // Private-verifier path: the operator first proves the update. The program's Verify is
+    // 14.6M cycles (15.9M padded, `zkvm/host` measure_lez); at LEZ's published CPU proving
+    // rate (73 us per padded cycle on an M2 Pro) that is about 19 minutes, and a GPU is
+    // assumed at about 1.5 to 2.5 minutes until M0 measures it.
+    let proving = [110_000, 135_000, 1_160_000, 1_330_000, 90_000];
     let private: Vec<Operator> = names
         .iter()
         .zip(latencies)

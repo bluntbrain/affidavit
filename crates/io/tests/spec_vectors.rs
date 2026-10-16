@@ -11,7 +11,7 @@ mod common;
 
 use std::path::PathBuf;
 
-use affidavit_core::bls::Blst;
+use affidavit_core::bls::{Blst, Zkcrypto};
 use affidavit_core::config::ForkName;
 use affidavit_core::lc::{self, InstanceConfig};
 use affidavit_io::spec_tests::load_sync_test;
@@ -34,7 +34,36 @@ fn run(fork_dir: &str, case: &str, fork: ForkName) -> (usize, usize) {
             break;
         }
         let committee = follower.signing_committee(&step.update);
-        match lc::verify_update(&follower.instance, &step.update, &committee, step.current_slot, &Blst) {
+        let verdict = lc::verify_update(&follower.instance, &step.update, &committee, step.current_slot, &Blst);
+        // The program's path (aggregate minus witnessed non-signers) reaches the same verdict.
+        let witness = Follower::committee_witness(&committee, &step.update.sync_aggregate);
+        for (backend, program_path) in [
+            (
+                "blst",
+                lc::verify_update_with_witness(
+                    &follower.instance,
+                    &step.update,
+                    &committee,
+                    Some(&witness),
+                    step.current_slot,
+                    &Blst,
+                ),
+            ),
+            (
+                "zkcrypto",
+                lc::verify_update_with_witness(
+                    &follower.instance,
+                    &step.update,
+                    &committee,
+                    Some(&witness),
+                    step.current_slot,
+                    &Zkcrypto { check_subgroups: false },
+                ),
+            ),
+        ] {
+            assert_eq!(program_path, verdict, "{fork_dir}/{case}: committee witness path ({backend})");
+        }
+        match verdict {
             Ok(advance) => {
                 lc::apply_advance(&mut follower.instance, &advance).unwrap();
                 if let Some(next) = &step.update.next_sync_committee {

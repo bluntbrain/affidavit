@@ -4,10 +4,12 @@
 
 use std::collections::HashMap;
 
-use affidavit_core::bls::Blst;
-use affidavit_core::lc::{self, Advance, Instance, InstanceConfig};
+use affidavit_core::bls::{uncompress, Blst};
+use affidavit_core::lc::{self, Advance, CommitteeWitness, Instance, InstanceConfig};
 use affidavit_core::mmr::{Mmr, MmrProof};
-use affidavit_core::types::{HeaderRecord, LightClientBootstrap, LightClientUpdate, SyncCommittee};
+use affidavit_core::types::{
+    BlsPublicKey, HeaderRecord, LightClientBootstrap, LightClientUpdate, SyncAggregate, SyncCommittee,
+};
 use alloy_primitives::B256;
 
 pub struct Follower {
@@ -48,9 +50,31 @@ impl Follower {
         })
     }
 
+    /// What an operator supplies with the committee keys so the program never decompresses
+    /// one (`docs/DECISIONS.md` D3): the aggregate key and the non-signers' keys as
+    /// uncompressed points. Keys that do not decompress come back zeroed, which the verifier
+    /// refuses.
+    pub fn committee_witness(committee: &SyncCommittee, aggregate: &SyncAggregate) -> CommitteeWitness {
+        let point = |pk: &BlsPublicKey| uncompress(pk).unwrap_or([0u8; 96]);
+        CommitteeWitness {
+            aggregate: point(&committee.aggregate_pubkey),
+            non_signers: committee
+                .pubkeys
+                .iter()
+                .enumerate()
+                .filter(|(i, _)| !aggregate.is_set(*i))
+                .map(|(_, pk)| point(pk))
+                .collect(),
+        }
+    }
+
+    /// Verifies `update` the way the program does (from a committee witness) and applies it.
     pub fn process(&mut self, update: &LightClientUpdate, now_slot: u64) -> affidavit_core::Result<Advance> {
         let committee = self.signing_committee(update);
-        let advance = lc::process_update(&mut self.instance, update, &committee, now_slot, &Blst)?;
+        let witness = Self::committee_witness(&committee, &update.sync_aggregate);
+        let advance =
+            lc::verify_update_with_witness(&self.instance, update, &committee, Some(&witness), now_slot, &Blst)?;
+        lc::apply_advance(&mut self.instance, &advance)?;
         if let Some(next) = &update.next_sync_committee {
             self.committees.insert(next.hash_tree_root(), next.clone());
         }

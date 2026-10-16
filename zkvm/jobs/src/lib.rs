@@ -4,7 +4,7 @@
 extern crate alloc;
 
 use affidavit_core::config::ChainSpec;
-use affidavit_core::lc::{Advance, Instance};
+use affidavit_core::lc::{Advance, CommitteeWitness, Instance};
 use affidavit_core::mmr::MmrProof;
 use affidavit_core::statement::{Evidence, Predicate};
 use affidavit_core::types::{HeaderRecord, LightClientUpdate, SyncCommittee};
@@ -16,7 +16,16 @@ use borsh::{BorshDeserialize, BorshSerialize};
 #[derive(BorshSerialize, BorshDeserialize)]
 pub enum Job {
     /// `lc::verify_update` end to end: what a private verifier actor proves.
-    VerifyUpdate { instance: Instance, update: LightClientUpdate, committee: SyncCommittee, now_slot: u64, check_subgroups: bool },
+    VerifyUpdate {
+        instance: Instance,
+        update: LightClientUpdate,
+        committee: SyncCommittee,
+        /// The aggregate and non-signer keys uncompressed, as the program receives them;
+        /// `None` makes the guest decompress every signer's key instead.
+        witness: Option<CommitteeWitness>,
+        now_slot: u64,
+        check_subgroups: bool,
+    },
     /// `lc::apply_advance`: what the public instance actor executes.
     ApplyAdvance { instance: Instance, advance: Advance },
     /// `statement::attest_with_membership`: what a consumer proves or executes.

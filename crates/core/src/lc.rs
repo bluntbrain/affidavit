@@ -14,7 +14,7 @@ use alloc::vec::Vec;
 use alloy_primitives::B256;
 use sha2::{Digest, Sha256};
 
-use crate::bls::BlsVerifier;
+use crate::bls::{BlsVerifier, UncompressedPublicKey, WitnessedKey};
 use crate::config::{
     current_sync_committee_gindex, finalized_root_gindex, next_sync_committee_gindex, ChainSpec, ForkName,
     EXECUTION_PAYLOAD_GINDEX,
@@ -88,6 +88,16 @@ pub struct Advance {
     pub participants: u32,
 }
 
+/// What a submitter supplies with the signing committee so the verifier never decompresses
+/// a key (`docs/DECISIONS.md` D3): the committee's aggregate key and the keys of the
+/// members that did not sign, in committee order, as uncompressed points.
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "borsh", derive(borsh::BorshSerialize, borsh::BorshDeserialize))]
+pub struct CommitteeWitness {
+    pub aggregate: UncompressedPublicKey,
+    pub non_signers: Vec<UncompressedPublicKey>,
+}
+
 pub fn compute_domain(domain_type: [u8; 4], fork_version: [u8; 4], genesis_validators_root: &B256) -> B256 {
     let mut version = [0u8; 32];
     version[..4].copy_from_slice(&fork_version);
@@ -152,17 +162,52 @@ pub fn verify_sync_aggregate(
     signature_slot: u64,
     bls: &impl BlsVerifier,
 ) -> Result<u32> {
+    verify_sync_aggregate_with_witness(spec, committee, None, aggregate, attested_root, signature_slot, bls)
+}
+
+/// As [`verify_sync_aggregate`], optionally from a [`CommitteeWitness`]: the signers' key
+/// is then the committee's committed aggregate minus its non-signers, and every witness
+/// must be the exact point its committed key encodes, or the update is refused.
+pub fn verify_sync_aggregate_with_witness(
+    spec: &ChainSpec,
+    committee: &SyncCommittee,
+    witness: Option<&CommitteeWitness>,
+    aggregate: &SyncAggregate,
+    attested_root: &B256,
+    signature_slot: u64,
+    bls: &impl BlsVerifier,
+) -> Result<u32> {
     let participants = check_participation(spec, aggregate)?;
     if committee.pubkeys.len() != spec.preset.sync_committee_size {
         return Err(Error::MalformedInput("sync committee size"));
     }
-    let signers: Vec<&BlsPublicKey> =
-        committee.pubkeys.iter().enumerate().filter(|(i, _)| aggregate.is_set(*i)).map(|(_, pk)| pk).collect();
     let fork_version_slot = signature_slot.max(1) - 1;
     let version = spec.fork_version_at_epoch(spec.epoch_at_slot(fork_version_slot));
     let domain = compute_domain(DOMAIN_SYNC_COMMITTEE, version, &spec.genesis_validators_root);
     let signing_root = hash_pair(attested_root, &domain);
-    if !bls.fast_aggregate_verify(&signers, &signing_root, &aggregate.sync_committee_signature) {
+    let signature = &aggregate.sync_committee_signature;
+    let verified = match witness {
+        Some(witness) => {
+            let non_signers: Vec<&BlsPublicKey> =
+                committee.pubkeys.iter().enumerate().filter(|(i, _)| !aggregate.is_set(*i)).map(|(_, pk)| pk).collect();
+            if witness.non_signers.len() != non_signers.len() {
+                return Err(Error::MalformedInput("uncompressed key witnesses"));
+            }
+            let non_signers: Vec<WitnessedKey<'_>> = non_signers.into_iter().zip(&witness.non_signers).collect();
+            bls.verify_aggregate_minus(
+                (&committee.aggregate_pubkey, &witness.aggregate),
+                &non_signers,
+                &signing_root,
+                signature,
+            )
+        }
+        None => {
+            let signers: Vec<&BlsPublicKey> =
+                committee.pubkeys.iter().enumerate().filter(|(i, _)| aggregate.is_set(*i)).map(|(_, pk)| pk).collect();
+            bls.fast_aggregate_verify(&signers, &signing_root, signature)
+        }
+    };
+    if !verified {
         return Err(Error::SyncCommitteeSignatureInvalid);
     }
     Ok(participants)
@@ -211,6 +256,19 @@ pub fn verify_update(
     instance: &Instance,
     update: &LightClientUpdate,
     signing_committee: &SyncCommittee,
+    now_slot: u64,
+    bls: &impl BlsVerifier,
+) -> Result<Advance> {
+    verify_update_with_witness(instance, update, signing_committee, None, now_slot, bls)
+}
+
+/// As [`verify_update`], with a [`CommitteeWitness`] for the signing committee, which is
+/// how the program receives the keys (`docs/DECISIONS.md` D3).
+pub fn verify_update_with_witness(
+    instance: &Instance,
+    update: &LightClientUpdate,
+    signing_committee: &SyncCommittee,
+    witness: Option<&CommitteeWitness>,
     now_slot: u64,
     bls: &impl BlsVerifier,
 ) -> Result<Advance> {
@@ -306,9 +364,10 @@ pub fn verify_update(
     if signing_committee.hash_tree_root() != expected_root {
         return Err(Error::CommitteeMismatch);
     }
-    let participants = verify_sync_aggregate(
+    let participants = verify_sync_aggregate_with_witness(
         spec,
         signing_committee,
+        witness,
         &update.sync_aggregate,
         &update.attested_header.beacon.hash_tree_root(),
         update.signature_slot,

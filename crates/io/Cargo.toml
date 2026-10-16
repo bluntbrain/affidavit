@@ -9,6 +9,7 @@ rust-version.workspace = true
 
 [dependencies]
 affidavit-core.workspace = true
+blst.workspace = true
 alloy-primitives = { workspace = true, features = ["std", "serde"] }
 alloy-rlp.workspace = true
 alloy-trie = { workspace = true, features = ["std"] }

@@ -12,8 +12,8 @@ anyone can catch the instance up later, within its weak-subjectivity period.
 | Need | Public-verifier path | Private-verifier path |
 |---|---|---|
 | Ethereum | a beacon API endpoint (light-client routes) and an execution endpoint with `eth_getProof`, reached through the Logos Ethereum core module | same |
-| LEZ | gas for the update transactions | gas for one transaction (about 0.41M + `Apply`) |
-| Compute | negligible (native verification is about 40 ms per update) | a RISC Zero prover: about 2 minutes per update on a GPU, about 20 on a laptop CPU |
+| LEZ | 12M to 15M gas per update, over at least two transactions | about 0.49M gas per update, in one transaction |
+| Compute | negligible (native verification is about 40 ms per update) | a RISC Zero prover: 15.9M padded cycles per update, about 19 minutes on an M2 Pro CPU (*estimate*), minutes on a GPU |
 | Standing | none: no registration, no allowlist, no stake, nothing on Ethereum | none |
 | State | the committee keys behind each tracked root (about 25 KB per period), recoverable from any beacon node | same |
 
@@ -65,23 +65,24 @@ Simulated over 20,000 updates with five operators of different latency and hardw
 | deferral window 120 s | 23% / 23% / 20% / 19% / 14% | 24.5 | 26 s / 64 s |
 | deferral window 300 s | 21% / 21% / 20% / 20% / 18% | 10.3 | 49 s / 146 s |
 
-**Private-verifier path** (A, B, E prove on GPUs in about 2 minutes; C, D on laptop CPUs
-in about 20):
+**Private-verifier path** (proving times from the measured 15.9M padded cycles: A, B, E
+prove on GPUs in 1.5 to 2.5 minutes; C and D on laptop CPUs in about 19 and 22):
 
-| strategy | share of updates paid | wasted submissions /100 | wasted proofs /100 | median / p95 latency |
+| strategy | share of updates paid (A, B, C, D, E) | wasted submissions /100 | wasted proofs /100 | median / p95 latency |
 |---|---|---:|---:|---|
-| submit on sight | 0% / 0% / 0% / 0% / 100% | 0.0 | 400.0 | 116 s / 118 s |
-| deferral window 600 s | 35% / 27% / 0% / 0% / 38% | 2.9 | 156.0 | 257 s / 511 s |
-| deferral window 1800 s | 34% / 31% / 1% / 0% / 34% | 1.0 | 84.4 | 502 s / 1259 s |
-| deferral 600 s + proving hint | 21% / 20% / 20% / 20% / 19% | 0.0 | 0.0 | 314 s / 1558 s |
-| deferral 1800 s + proving hint | 20% / 20% / 20% / 20% / 19% | 0.0 | 0.0 | 676 s / 1945 s |
+| submit on sight | 0% / 0% / 0% / 0% / 100% | 0.0 | 400.0 | 106 s / 108 s |
+| deferral window 600 s | 35% / 28% / 0% / 0% / 37% | 2.7 | 146.5 | 245 s / 500 s |
+| deferral window 1800 s | 34% / 31% / 1% / 0% / 34% | 0.9 | 81.0 | 490 s / 1242 s |
+| deferral 600 s + proving hint | 21% / 20% / 20% / 20% / 19% | 0.0 | 0.0 | 302 s / 1491 s |
+| deferral 1800 s + proving hint | 20% / 20% / 20% / 20% / 19% | 0.0 | 0.0 | 664 s / 1881 s |
 
 Reading it: on the public path a 300 s window spreads the cost evenly and wastes about one
 submission in ten updates, at a median latency under a minute. On the private path the
-second check alone already removes wasted gas; the hint removes wasted proofs and lets
-slow provers take their turn, at the price of latency when a slow prover goes first. The
-recommended defaults are W = 300 s (public) and W = 600 s with hints (private), both
-configurable.
+second check keeps wasted gas near zero whatever the strategy; what racing wastes there is
+proofs, 400 per 100 updates when everyone proves on sight, and the slow provers never get
+a turn. The hint removes wasted proofs and gives every operator about a fifth of the
+updates, at the price of latency when a slow prover goes first. The recommended defaults
+are W = 300 s (public) and W = 600 s with hints (private), both configurable.
 
 ## Noticing a stalled instance
 

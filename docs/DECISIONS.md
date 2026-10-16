@@ -26,25 +26,43 @@ account. (b) Place `Verify` privately: the submitter proves it, the sequencer ve
 receipt at fixed cost. (c) Ask for a BLS12-381 precompile.
 
 **Chosen: (b), with (a) as the fallback and the measured comparison.** (b) is one
-transaction, about 0.41M gas plus `Apply`, needs no precompile and no protocol change,
-and moves the cycles to whoever chooses to operate. It rests on one LEZ behaviour to
-confirm on testnet 0.4 in M0 (a privately placed actor of a public program, sending to a
-public actor that sees `from_own_program()`). (a) works without it at roughly thirty
-times the sequencer gas; (c) is out of scope and only worth an RFP if both fall short.
+transaction, about 0.49M gas with `Apply` and `Record`, needs no precompile and no
+protocol change, and moves the cycles to whoever chooses to operate. It rests on one LEZ
+behaviour to confirm on testnet 0.4 in M0 (a privately placed actor of a public program,
+sending to a public actor that sees `from_own_program()`). (a) works without it at 25 to
+30 times the sequencer gas (12M to 15M against 0.49M, both measured on the program
+binary); (c) is out of scope and only worth an RFP if both fall short.
 
-## D3. Committee keys are bound by the state root, not re-validated
+## D3. The signers' key is the committed aggregate minus the non-signers, from witnesses
 
-**Context.** Decompressing and subgroup-checking 512 keys is the largest single cost of
-an update in a zkVM.
+**Context.** A straight port spends almost all of an update on the 512 committee keys:
+decompressing and subgroup-checking them is 517M of the update's 549M cycles with
+zkcrypto, and the whole update is 240M with blst.
 
-**Options.** (a) Full `KeyValidate` on every key, every update. (b) Decompress, skip the
-subgroup check. (c) Supply uncompressed keys and check each against its compressed form.
+**Options.** (a) Full `KeyValidate` on every signer's key, every update, then add them up.
+(b) Decompress, skip the subgroup check: still about 90M cycles of square roots.
+(c) The submitter supplies every key uncompressed; the verifier checks each point is on
+the curve, is not the identity, and compresses to exactly the committed bytes, and adds
+up the signers: 18.0M cycles for a whole update with blst. (d) A sync committee commits
+to its own aggregate key next to its 512 keys (the field exists for this), so the
+signers' key is that aggregate minus the non-signers' keys: only the aggregate and the
+non-signers need witnesses, checked as in (c).
 
-**Chosen: (b) in the program, (a) in the native tools.** Every key is bound, through the
-SSZ root the instance tracks, to a beacon state that admitted it only after verifying its
-proof of possession at deposit, so a key outside the subgroup cannot be in a committee the
-instance accepted. The native CLI and daemon keep full validation because it is free
-there. (c) is a further optimisation to measure in M0 if (b) is not enough.
+**Chosen: (d) in the program, (a) in the native tools.** A witness that compresses to the
+committed bytes is the committed key, so (c) and (d) skip decompression, not a check on
+what the committee root commits to. The subgroup check is skipped because every key is
+bound, through the SSZ root the instance tracks, to a beacon state that admitted it only
+after verifying its proof of possession at deposit (`Verify` includes `KeyValidate`), so
+under the honest-majority assumption the instance already rests on, a key outside the
+subgroup cannot be in a committee it accepted; the aggregate is bound the same way, and
+`committee_witnesses_give_the_same_verdicts` checks on mainnet that it is the sum of the
+keys. Measured with blst, a whole update goes from 240M cycles (a) to 18.0M (c) to
+**13.7M** (d) at full participation, and 15.6M at the 342/512 minimum, where 170
+non-signers are subtracted. The native CLI and daemon keep full validation because it is
+free there, and every mainnet update and spec vector reaches the same verdict both ways.
+`forged_key_witnesses_are_refused` checks that a signer's key in a non-signer's place,
+the identity, a wrong or off-curve aggregate, a missing witness, and a committee that
+claims another aggregate are all refused, by both libraries.
 
 ## D4. Committees as roots, keys as witnesses
 

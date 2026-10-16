@@ -108,3 +108,40 @@ fn both_bls_libraries_agree_on_every_real_update() {
         follower.process(update, NOW_SLOT).unwrap();
     }
 }
+
+/// The program's path (committed aggregate minus witnessed non-signers) reaches exactly the
+/// verdicts of `FastAggregateVerify` over every signer's decompressed, validated key, with
+/// both libraries; and on mainnet the committed aggregate is the sum of the keys.
+#[test]
+fn committee_witnesses_give_the_same_verdicts() {
+    use affidavit_core::bls::Zkcrypto;
+    use blst::min_pk::{AggregatePublicKey, PublicKey};
+    let mut follower = Follower::new(mainnet_config(), &bootstrap(), NOW_SLOT).unwrap();
+    let mut all = updates();
+    all.push(finality_update());
+    for update in &all {
+        let committee = follower.signing_committee(update);
+        let keys: Vec<PublicKey> = committee.pubkeys.iter().map(|pk| PublicKey::key_validate(pk).unwrap()).collect();
+        let sum = AggregatePublicKey::aggregate(&keys.iter().collect::<Vec<_>>(), false).unwrap();
+        assert_eq!(sum.to_public_key().compress(), committee.aggregate_pubkey);
+
+        let witness = Follower::committee_witness(&committee, &update.sync_aggregate);
+        assert_eq!(witness.non_signers.len(), 512 - update.sync_aggregate.participants() as usize);
+        let plain = lc::verify_update(&follower.instance, update, &committee, NOW_SLOT, &Blst).unwrap();
+        let with_blst =
+            lc::verify_update_with_witness(&follower.instance, update, &committee, Some(&witness), NOW_SLOT, &Blst)
+                .unwrap();
+        let with_zk = lc::verify_update_with_witness(
+            &follower.instance,
+            update,
+            &committee,
+            Some(&witness),
+            NOW_SLOT,
+            &Zkcrypto { check_subgroups: false },
+        )
+        .unwrap();
+        assert_eq!(plain, with_blst);
+        assert_eq!(plain, with_zk);
+        follower.process(update, NOW_SLOT).unwrap();
+    }
+}

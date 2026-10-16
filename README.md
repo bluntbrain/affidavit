@@ -18,7 +18,8 @@ few seconds (output below).
 ## What works today
 
 All of it is tested on **real mainnet data** (fixtures from [Helios](https://github.com/a16z/helios),
-MIT) and the **official consensus-spec-tests vectors**; `cargo test --workspace` runs 41 tests.
+MIT) and the **official consensus-spec-tests vectors**; `cargo test --workspace` runs 38 tests,
+and the LEZ program has 5 more.
 
 | | |
 |---|---|
@@ -27,16 +28,17 @@ MIT) and the **official consensus-spec-tests vectors**; `cargo test --workspace`
 | **Statements** | Predicates (`==`, `!=`, `<`, `<=`, `>`, `>=`) supplied by the consumer; chain binding; deterministic identifiers for nullifiers. |
 | **Attacks refused** | Fabricated chain with every Merkle path repaired, 341/512 signatures, attacker committee, tampered roots, missing finality, replays, skipped periods, stale checkpoint, other networks, uncovered predicates: one test each, with a typed error code. |
 | **LEZ program** | Handlers for LEZ `main`'s actor model (`lez/program`): instance at the PDA of its own configuration, permissionless verification by any actor, compare-and-swap apply, write-once header records, public and private consumer paths. Driven through LEZ's `ReceiveInput`/`Response` over all mainnet updates, it ends in the same state as the native client. |
-| **zkVM cost** | The same verification code built for RISC Zero (`zkvm/`, upstream nightly + `build-std`, no `rzup`), executed to count cycles per phase. See [`docs/COSTS.md`](docs/COSTS.md). |
-| **Operators** | Deferral and check-before-submit policy plus a contention simulation: with a 300 s window five operators each pay about 20% and wasted submissions fall 30×. See [`docs/OPERATOR.md`](docs/OPERATOR.md). |
+| **Measured cost** | The LEZ program binary itself, built for RISC Zero (upstream nightly + `build-std`, no `rzup`) and executed with LEZ's input framing: `Verify` 14.6M cycles, `Apply` 57K, a consumer attestation 0.6M to 1.3M. Placed privately, an update costs the sequencer about **0.49M gas, 25 to 30× less** than verifying it publicly. The signers' key is the committee's committed aggregate minus the witnessed non-signers, which took an update from 240M cycles to 13.7M. See [`docs/COSTS.md`](docs/COSTS.md). |
+| **Operators** | Deferral, check-before-submit and proving hints, plus a contention simulation: five operators each pay about 20%, wasted submissions fall 30× on the public path, and wasted proofs fall from 400 to 0 per 100 updates on the private path. See [`docs/OPERATOR.md`](docs/OPERATOR.md). |
 
 ## The design in four points
 
 1. **Verify, then apply.** `Verify` is pure and can run in any actor of the program;
    `Apply` is a compare-and-swap the instance accepts only from its own program. Placed
    privately, the 15M-cycle verification is proven by the submitter and the sequencer
-   checks one receipt (~0.41M gas) instead of executing it, so no BLS precompile is
-   needed. A public, split fallback uses the same code. ([DESIGN §2](docs/DESIGN.md))
+   checks one receipt instead of executing it: about 0.49M gas per update, one
+   transaction, no BLS precompile needed. A public, split fallback uses the same code.
+   ([DESIGN §2](docs/DESIGN.md))
 2. **The address is the configuration.** An instance lives at the PDA of the hash of its
    chain, checkpoint and limits: nothing can reconfigure it, any number coexist.
 3. **Private consumers disclose one shared root.** A header accumulator lets a private
@@ -66,18 +68,28 @@ crates/io     Beacon API / JSON-RPC / spec-test decoding, proof builders, follow
 crates/cli    `affidavit` CLI: demo, sync, attest, checkpoint
 crates/sim    operator contention simulation
 lez/program   the LEZ program (actor model on LEZ main, pinned commit)
-zkvm/         RISC Zero guest + host that measures every path in cycles
+zkvm/         RISC Zero measurement guest, and hosts that count cycles for the core and the program
 testdata/     mainnet fixtures and consensus-spec-tests vectors (provenance in testdata/README.md)
 ```
 
 ## Run it
 
 ```console
-cargo test --workspace --release                       # 41 tests: mainnet data, spec vectors, attacks
+cargo test --workspace --release                       # 38 tests: mainnet data, spec vectors, attacks
 cargo run --release -p affidavit-cli -- demo           # the narrated pipeline
 cargo run --release -p affidavit-sim                   # operator contention tables
-cargo test --release --manifest-path lez/program/Cargo.toml   # LEZ program handlers
-zkvm/build-guest.sh && (cd zkvm/host && RISC0_SKIP_BUILD_KERNELS=1 cargo run --release)  # cycle counts
+cargo test --release --manifest-path lez/program/Cargo.toml   # LEZ program handlers (5 tests)
+```
+
+Cycle counts need nightly Rust with `rust-src`, `clang` and `llvm-ar` (no `rzup`, no Docker):
+
+```console
+zkvm/build-guest.sh                                     # measurement guest, zkcrypto
+CARGO_TARGET_DIR=target-blst zkvm/build-guest.sh --features blst
+lez/build-program.sh                                    # the LEZ program binary
+cd zkvm/host
+RISC0_SKIP_BUILD_KERNELS=1 cargo run --release --bin affidavit-zkvm-host   # core, phase by phase
+RISC0_SKIP_BUILD_KERNELS=1 cargo run --release --bin measure_lez           # program, action by action
 ```
 
 The CLI works on files today (Beacon API and JSON-RPC responses); live fetching goes
@@ -86,8 +98,9 @@ through the Logos Ethereum core module in the grant's M3.
 ## What this prototype is not yet
 
 Not deployed to a LEZ testnet; the program's handlers are tested natively against LEZ's
-types rather than through a sequencer. No Logos core module or update daemon yet (the
-submission policy and its simulation are). Receipts for the light-client fixture's block
+types rather than through a sequencer. Cycle counts come from the RISC Zero executor and
+nothing is proven yet, so proving times are estimates from LEZ's benchmarked rate. No
+Logos core module or update daemon yet (the submission policy and its simulation are). Receipts for the light-client fixture's block
 are not available offline, so the native-transfer demo proves inclusion and sender but not
 success; the receipt path is tested on other mainnet blocks. Gloas containers (Sepolia
 since 2026-10-06) are not in. These are the milestones in the proposal.

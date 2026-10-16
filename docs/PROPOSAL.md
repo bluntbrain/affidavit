@@ -19,14 +19,14 @@ Independent
 
 ## Primary Contact
 
-{{CONTACT}}
+ishan.lakhwani@gmail.com · Telegram @bluntbrainsol
 
 ## Team Members
 
 **Ishan Lakhwani** (bluntbrain)
-- Links: [github.com/bluntbrain](https://github.com/bluntbrain) · [bluntbrain.com](https://bluntbrain.com) · [linkedin.com/in/ishanl](https://linkedin.com/in/ishanl) · [x.com/bluntbrain](https://x.com/bluntbrain)
-- Role: everything in this proposal: light client and LEZ program, inclusion and statements, core module, update daemon, CLI, cost measurement, docs
-- Status: {{STATUS}}
+- Social links: [github.com/bluntbrain](https://github.com/bluntbrain) · [bluntbrain.com](https://bluntbrain.com) · [linkedin.com/in/ishanl](https://linkedin.com/in/ishanl) · [x.com/bluntbrain](https://x.com/bluntbrain)
+- Role: everything in this proposal: light client and LEZ program, inclusion proofs and statements, core module, update daemon, CLI, cost measurement, docs
+- Status: part-time, 30+ hours a week for the whole grant (the timeline below is planned at that pace)
 
 The independent audit (Supportability #8) is done by a third-party firm, scoped and quoted
 during the grant so Logos can contract it directly (see Milestones).
@@ -57,26 +57,27 @@ verified, attests WETH and USDC transfers and a storage slot, passes the officia
 consensus-spec-tests light-client vectors for Deneb and Electra, and refuses every attack
 the RFP lists (fabricated chain, 341/512 signatures, a foreign committee, tampered roots,
 replays, other networks) with a typed error code. `cargo run -p affidavit-cli -- demo`
-shows all of it in one run. The LEZ program is written for the actor model on LEZ `main`
-and, driven through LEZ's own message types across all the mainnet updates, ends in
-exactly the state the native light client reaches.
+shows all of it in one run. The LEZ program is written for the actor model on LEZ `main`;
+driven through LEZ's own message types across all the mainnet updates, it ends in exactly
+the state the native light client reaches, and its binary is measured action by action in
+the RISC Zero executor.
 
 Two design choices matter most for LEZ in particular. First, verification is separated
-from application, so the {{UPDATE_CYCLES}}-cycle update check can run in a privately placed
-actor whose execution the submitter proves, while the instance stays public: one
-transaction at about 0.41M gas instead of several near the 10M cap, and no BLS12-381
-precompile needed. Second, private consumers prove their header is in the instance's header
-accumulator, so the only thing they disclose is a root every consumer shares, which is
-what Functionality #8 asks for.
+from application, so the 15M-cycle update check can run in a privately placed actor whose
+execution the submitter proves, while the instance stays public: **one transaction at about
+0.49M gas per update**, where verifying publicly costs 12M to 15M gas split over at
+least two transactions under the 10M cap, and no BLS12-381 precompile is needed. Second, private
+consumers prove their header is in the instance's header accumulator, so the only thing
+they disclose is a root every consumer shares, which is what Functionality #8 asks for.
 
 ## Technical Approach
 
 **Stack.** Rust; LEZ programs on the actor model of LEZ `main` (the codebase after v0.3;
-SPEL for the IDL); RISC Zero 3.0 with RISC Zero's accelerated forks of `bls12_381`/`blst`,
-`sha2` and `k256`; `alloy-trie`/`alloy-consensus` for Merkle-Patricia proofs and decoding;
-the Logos Ethereum core module (`eth_rpc_module` with the Nimbus verified proxy) for every
-Ethereum read; Logos modules for the core module and daemon, with the Rust library behind
-a C ABI the way `logos-verified-proxy-module` wraps `libverifproxy`.
+SPEL for the IDL); RISC Zero 3.0 with RISC Zero's accelerated forks of `blst`, `sha2` and
+`k256`; `alloy-trie`/`alloy-consensus` for Merkle-Patricia proofs and decoding; the Logos
+Ethereum core module (`eth_rpc_module` with the Nimbus verified proxy) for every Ethereum
+read; Logos modules for the core module and daemon, with the Rust library behind a C ABI
+the way `logos-verified-proxy-module` wraps `libverifproxy`.
 
 **Program actors** ([design](https://github.com/bluntbrain/affidavit/blob/main/docs/DESIGN.md)):
 - *Instance*, at the PDA of the hash of its own configuration (chain id, genesis validators
@@ -91,15 +92,20 @@ a C ABI the way `logos-verified-proxy-module` wraps `libverifproxy`.
   compare-and-swap, so duplicates and racing operators change nothing (#R8).
 - *Header records*, write-once, and a header accumulator (at most 64 peaks) on the instance.
 
-**Where the update cost lands.** Measured in the RISC Zero executor
-([costs](https://github.com/bluntbrain/affidavit/blob/main/docs/COSTS.md)), a full update
-is {{UPDATE_CYCLES}} cycles, above LEZ's 10M per-transaction cap. LEZ runs private actors
-uncapped and proven by the sender, with the sequencer verifying one receipt at a fixed
-409,764 gas. So the preferred path places `Verify` privately: one transaction, about 0.41M
-gas plus `Apply` ({{APPLY_CYCLES}} cycles). The submitter proves for about two minutes on a
-GPU. The fallback, if testnet 0.4 does not allow that placement, splits the public
-verification along the pairing's seams. M0 settles this on testnet first, and both paths
-are measured, since the comparison is the input to any precompile RFP (#P8).
+**Where the update cost lands** ([measured costs](https://github.com/bluntbrain/affidavit/blob/main/docs/COSTS.md)).
+The signers' key is the committee's committed aggregate key minus the non-signers' keys,
+all supplied as uncompressed points that must compress to the committed bytes, so no key
+is ever decompressed: that took a whole update from 240M cycles (a straight port) to
+13.7M. In the program binary, `Verify` is 14.6M cycles with a handoff and 12.3M without,
+above LEZ's 10M per-transaction cap. LEZ runs private actors uncapped and proven by the
+sender, with the sequencer verifying one receipt at a fixed 409,764 gas. So the preferred
+path places `Verify` privately: one transaction, about 0.49M gas including `Apply` (57K
+cycles) and the header record (20K), 25 to 30 times less than verifying publicly. The
+submitter proves 15.9M padded cycles: about 19 minutes on an M2 Pro CPU at LEZ's
+benchmarked rate, minutes on a GPU. The fallback, if testnet 0.4 does not allow that
+placement, splits the public verification along the pairing's seams. M0 settles this on
+testnet first, and both paths are measured, since the comparison is the input to any
+precompile RFP (#P8).
 
 **Consumers.** Inclusion and the predicate run in the consumer's own transaction (#F7).
 Public consumers call a header record. Private consumers call a privately placed actor
@@ -107,9 +113,10 @@ that proves accumulator membership; the only public crossing is `CheckRoot(root)
 the instance, which answers for its last 64 roots so private proofs survive a new header
 landing (#R11). Facts: accounts and storage (MPT), logs read from the receipt by index,
 and native ETH transfers by SSZ proof under the payload's `transactions_root`, sender
-recovery and the receipt's status. Measured consumer cost: {{CONSUMER_CYCLES}}.
-Statement identifiers depend on the chain and the fact, never on the instance, so
-nullifiers survive migration to a replacement instance.
+recovery and the receipt's status. Measured: 0.6M to 1.3M cycles per attestation, within
+one transaction (#P1); a private attestation is about 1.5 to 2 minutes of proving on a
+laptop CPU (#P4). Statement identifiers depend on the chain and the fact, never on the
+instance, so nullifiers survive migration to a replacement instance.
 
 **Reuse** ([assessment](https://github.com/bluntbrain/affidavit/blob/main/docs/REUSE.md)).
 Reused unchanged: blst and zkcrypto BLS (RISC Zero forks in the guest), alloy's trie, RLP
@@ -127,7 +134,8 @@ instance before working and again before submitting, and on the private path ann
 "proving update *u*, ETA *t*" over Logos Messaging. Simulated with five operators over
 20,000 updates: a 300 s window spreads the public-path cost about 20% each and cuts wasted
 submissions 30×; on the private path, hints bring wasted proofs from 400 to 0 per 100
-updates. Hints are never trusted; a liar costs bounded delay (#R9, #R10).
+updates while every operator, laptop or GPU, still lands about a fifth. Hints are never
+trusted; a liar costs bounded delay (#R9, #R10).
 
 **Trust** ([trust assumptions](https://github.com/bluntbrain/affidavit/blob/main/docs/TRUST.md)).
 Honest two-thirds of a 512-member committee, which today is not backed by slashing:
@@ -138,7 +146,7 @@ which consumers bound with caps and freezes. Weak-subjectivity limit 3,533 epoch
 verification exposed through the core module.
 
 **Anticipated challenges.**
-1. *LEZ 0.4 semantics for private placement* — validated first, with a measured fallback.
+1. *LEZ 0.4 semantics for private placement*: validated first, with a measured fallback.
 2. *Forks.* Sepolia moved to Gloas on 2026-10-06; Gloas headers commit only to the
    execution block hash, so roots come from the RLP header checked against it (first piece
    already in the core). Hoodi (Fulu) is the first testnet target; the Gloas program version
@@ -150,14 +158,15 @@ verification exposed through the core module.
 
 ## Milestones, Payout and Timeline
 
-Every milestone is a tagged release with green CI, updated docs and the decision log.
+Twelve weeks of build, inside the RFP's 8 to 12, plus remediation after the audit. Every
+milestone is a tagged release with green CI, updated docs and the decision log.
 
 **M0 — LEZ 0.4 validation and cost baseline** · 2 weeks · $5,000
 On LEZ testnet 0.4 (or `main` in standalone mode if 0.4 is not out): the private placement
 of `Verify` end to end, or the public split if it does not hold; measured cycles, gas,
 proof time and proof size for update, apply and each consumer path; whether LEZ can verify
-an arbitrary RISC Zero receipt (composition); reuse assessment finished with those numbers;
-design freeze.
+an arbitrary RISC Zero receipt (composition); reproducible program build with its image id
+checked in CI; reuse assessment finished with those numbers; design freeze.
 
 **M1 — Light client on testnet** · 3 weeks · $11,000
 Program on LEZ testnet 0.4: initialise, verify, apply, header records, accumulator;
@@ -178,7 +187,7 @@ module plus headless CLI: deferral, check-before-submit, proving hints over Logo
 Messaging, metrics and stall alerts, restart without re-verification, clean shutdown;
 operator and CLI docs.
 
-**M4 — Release and handover** · 2 weeks · $4,000
+**M4 — Release and handover** · 1 week · $4,000
 Module catalog from the template, built and released with the release action; a public
 operator running for the testnet instances; final docs; audit-ready package (spec, threat
 model, vectors, traceability matrix).
@@ -190,13 +199,17 @@ The audit itself is not in this budget: I will scope it in M2 with a firm that h
 audited this code family (zkSecurity audited r0vm-helios, Zellic SP1 Helios, Veridise
 Telepathy) for Logos to contract directly, as the RFP anticipates.
 
+Each milestone stands on its own. If Logos wants to combine work across proposals, M3
+(core module, CLI, daemon) and the private-verifier and private-consumer paths can be
+delivered separately.
+
 ## Total Requested Budget (USD)
 
-{{BUDGET}}
+$45,000
 
 ## Relevant Experience
 
-- **This prototype:** [github.com/bluntbrain/affidavit](https://github.com/bluntbrain/affidavit). Light client, inclusion, statements and the LEZ program, on mainnet data and the official spec vectors, with zkVM cycle counts and an operator simulation.
+- **This prototype:** [github.com/bluntbrain/affidavit](https://github.com/bluntbrain/affidavit). Light client, inclusion, statements and the LEZ program, on mainnet data and the official spec vectors, with zkVM cycle counts per program action and an operator simulation.
 - **Infrastructure Lead at Spout Finance** (tokenised real-world assets, 2026–): own the cloud and release path (Terraform, AWS, Fargate, RDS, Kubernetes, CI/CD) for infrastructure that carries real money. The update daemon, its operator journey and the CI this RFP asks for are this job.
 - **Smart contracts, Solidity and Rust:** an [exogenously collateralised stablecoin with liquidations](https://github.com/bluntbrain/stable-coin-foundry) and [invariant testing](https://github.com/bluntbrain/invariant-testing-foundry) in Foundry; [Solana programs in Anchor and `no_std` Pinocchio](https://github.com/bluntbrain/solana-projects) (vaults, escrow, AMM, flash loans, CPI); a [Solana lending protocol](https://github.com/bluntbrain/solana-lending-protocol).
 - **Hackathon wins:** ETHGlobal SuperHack ($10,000, Repo Rewards on Base), StarkHack ($4,000, Cairo), ETH Bangkok ($2,000, a ZK credit score proving creditworthiness without revealing balances).

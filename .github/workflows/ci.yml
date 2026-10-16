@@ -36,7 +36,7 @@ jobs:
       - run: cargo test --release --manifest-path lez/program/Cargo.toml
 
   zkvm-guest:
-    name: RISC Zero guest builds (nightly, build-std, no rzup)
+    name: RISC Zero builds of the guest and the LEZ program (nightly, build-std, no rzup)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,5 +45,11 @@ jobs:
           components: rust-src
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: zkvm/guest
+          workspaces: |
+            zkvm/guest -> target
+            lez/program -> target-zkvm
+      # blst's C code is cross-compiled for the zkVM with clang and llvm-ar.
+      - run: sudo apt-get update && sudo apt-get install -y clang llvm
       - run: zkvm/build-guest.sh
+      - run: CARGO_TARGET_DIR=target-blst zkvm/build-guest.sh --features blst
+      - run: lez/build-program.sh

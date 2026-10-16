@@ -115,6 +115,7 @@ fn whole_mainnet_flow_through_the_handlers() {
             &Message::Verify {
                 snapshot: snapshot.instance.clone(),
                 update: update.clone(),
+                witness: Some(Follower::committee_witness(&committee, &update.sync_aggregate)),
                 committee,
                 now_slot: NOW_SLOT,
             },
@@ -150,7 +151,13 @@ fn synced() -> (Chain, Follower) {
             verifier,
             None,
             &[],
-            &Message::Verify { snapshot: snapshot.instance, update: update.clone(), committee, now_slot: NOW_SLOT },
+            &Message::Verify {
+                snapshot: snapshot.instance,
+                update: update.clone(),
+                witness: Some(Follower::committee_witness(&committee, &update.sync_aggregate)),
+                committee,
+                now_slot: NOW_SLOT,
+            },
         );
         let (instance, apply) = sent_message(&verified, 0);
         let applied = deliver(instance, Some(verifier), &chain.instance_state, &apply);
@@ -208,7 +215,13 @@ fn only_this_programs_actors_can_apply_or_record() {
             verifier,
             None,
             &[],
-            &Message::Verify { snapshot: account.instance.clone(), update: last, committee, now_slot: NOW_SLOT }
+            &Message::Verify {
+                snapshot: account.instance.clone(),
+                update: last,
+                witness: None,
+                committee,
+                now_slot: NOW_SLOT
+            }
         )),
         "AFF-207"
     );
@@ -322,7 +335,12 @@ fn storage_sizes() {
     let (chain, _) = synced();
     let account: InstanceAccount = borsh::from_slice(&chain.instance_state).unwrap();
     let record_bytes = chain.records.last().unwrap().1.len();
-    println!("instance account: {} bytes ({} roots in the ring, {} accumulator peaks)", chain.instance_state.len(), account.recent_roots.len(), account.instance.state.headers.peaks.len());
+    println!(
+        "instance account: {} bytes ({} roots in the ring, {} accumulator peaks)",
+        chain.instance_state.len(),
+        account.recent_roots.len(),
+        account.instance.state.headers.peaks.len()
+    );
     println!("header record: {record_bytes} bytes");
     // Worst case for the instance: a full 64-root ring and 64 accumulator peaks.
     let mut full = account.clone();

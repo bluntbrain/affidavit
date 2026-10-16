@@ -13,7 +13,7 @@ use affidavit_core::types::{HeaderRecord, LightClientUpdate, SyncAggregate, Sync
 use affidavit_io::rpc;
 use alloy_primitives::{address, keccak256, Bytes, B256, U256};
 use alloy_trie::{proof::ProofRetainer, HashBuilder, Nibbles, TrieAccount, EMPTY_ROOT_HASH, KECCAK_EMPTY};
-use blst::min_pk::{AggregateSignature, SecretKey};
+use blst::min_pk::{AggregatePublicKey, AggregateSignature, SecretKey};
 use common::*;
 
 /// Recomputes the root a branch proves for a new leaf: what an attacker does to keep a
@@ -110,9 +110,15 @@ fn keys(n: usize, seed: u8) -> Vec<SecretKey> {
     (0..n).map(|i| SecretKey::key_gen(&[seed, (i >> 8) as u8, i as u8, 7].repeat(8), &[]).unwrap()).collect()
 }
 
+/// A well-formed committee of the given keys, aggregate key included, as an attacker would
+/// build one.
 fn committee_of(sks: &[SecretKey]) -> SyncCommittee {
-    let pubkeys: Vec<[u8; 48]> = sks.iter().map(|sk| sk.sk_to_pk().compress()).collect();
-    SyncCommittee { pubkeys: pubkeys.clone(), aggregate_pubkey: pubkeys[0] }
+    let keys: Vec<_> = sks.iter().map(|sk| sk.sk_to_pk()).collect();
+    let aggregate = AggregatePublicKey::aggregate(&keys.iter().collect::<Vec<_>>(), true).unwrap();
+    SyncCommittee {
+        pubkeys: keys.iter().map(|pk| pk.compress()).collect(),
+        aggregate_pubkey: aggregate.to_public_key().compress(),
+    }
 }
 
 fn sign(sks: &[SecretKey], signers: usize, message: &B256) -> SyncAggregate {
@@ -187,6 +193,22 @@ fn participation_threshold_boundary() {
         verify_sync_aggregate(&spec, &committee, &inflated, &attested_root, signature_slot, &Blst).unwrap_err(),
         Error::SyncCommitteeSignatureInvalid
     );
+
+    // The program's path agrees at the boundary, where it subtracts the most non-signers.
+    use affidavit_core::bls::Zkcrypto;
+    use affidavit_core::lc::verify_sync_aggregate_with_witness as with_witness;
+    let zk = Zkcrypto { check_subgroups: false };
+    let witness = Follower::committee_witness(&committee, &at);
+    assert_eq!(witness.non_signers.len(), 170);
+    assert_eq!(with_witness(&spec, &committee, Some(&witness), &at, &attested_root, signature_slot, &Blst), Ok(342));
+    assert_eq!(with_witness(&spec, &committee, Some(&witness), &at, &attested_root, signature_slot, &zk), Ok(342));
+    let witness = Follower::committee_witness(&committee, &inflated);
+    for result in [
+        with_witness(&spec, &committee, Some(&witness), &inflated, &attested_root, signature_slot, &Blst),
+        with_witness(&spec, &committee, Some(&witness), &inflated, &attested_root, signature_slot, &zk),
+    ] {
+        assert_eq!(result.unwrap_err(), Error::SyncCommitteeSignatureInvalid);
+    }
 }
 
 #[test]
@@ -412,4 +434,66 @@ fn signatures_do_not_transfer_between_headers() {
         lc::verify_update(&follower.instance, &update, &committee, NOW_SLOT, &Blst).unwrap_err(),
         Error::SyncCommitteeSignatureInvalid
     );
+}
+
+/// The committee witness replaces decompression only: any witness that is not exactly the
+/// committed key is refused, by both libraries, and the aggregate cannot be swapped because
+/// the committee root commits to it.
+#[test]
+fn forged_key_witnesses_are_refused() {
+    use affidavit_core::bls::{uncompress, Zkcrypto};
+    let follower = Follower::new(mainnet_config(), &bootstrap(), NOW_SLOT).unwrap();
+    // 511 of 512 signed: one non-signer to witness.
+    let update = updates()[0].clone();
+    let committee = follower.signing_committee(&update);
+    let honest = Follower::committee_witness(&committee, &update.sync_aggregate);
+    assert_eq!(honest.non_signers.len(), 1);
+    let verify = |committee: &SyncCommittee, witness: &lc::CommitteeWitness| {
+        let with_blst =
+            lc::verify_update_with_witness(&follower.instance, &update, committee, Some(witness), NOW_SLOT, &Blst);
+        let with_zk = lc::verify_update_with_witness(
+            &follower.instance,
+            &update,
+            committee,
+            Some(witness),
+            NOW_SLOT,
+            &Zkcrypto { check_subgroups: false },
+        );
+        assert_eq!(with_blst, with_zk);
+        with_blst
+    };
+    assert!(verify(&committee, &honest).is_ok());
+
+    let identity = {
+        let mut point = [0u8; 96];
+        point[0] = 0x40;
+        point
+    };
+    let signer_point = uncompress(&committee.pubkeys[0]).unwrap();
+    let forged = [
+        (
+            "a signer's key as the non-signer",
+            lc::CommitteeWitness { non_signers: vec![signer_point], ..honest.clone() },
+        ),
+        ("the identity as the non-signer", lc::CommitteeWitness { non_signers: vec![identity], ..honest.clone() }),
+        ("a signer's key as the aggregate", lc::CommitteeWitness { aggregate: signer_point, ..honest.clone() }),
+        ("the identity as the aggregate", lc::CommitteeWitness { aggregate: identity, ..honest.clone() }),
+        ("an aggregate off the curve", {
+            let mut witness = honest.clone();
+            witness.aggregate[95] ^= 1;
+            witness
+        }),
+    ];
+    for (label, witness) in forged {
+        assert_eq!(verify(&committee, &witness).unwrap_err(), Error::SyncCommitteeSignatureInvalid, "{label}");
+    }
+    let missing = lc::CommitteeWitness { non_signers: vec![], ..honest.clone() };
+    assert_eq!(verify(&committee, &missing).unwrap_err(), Error::MalformedInput("uncompressed key witnesses"));
+
+    // A committee claiming another aggregate key, with a matching witness, is not the
+    // committee the instance tracks.
+    let mut relabelled = committee.clone();
+    relabelled.aggregate_pubkey = committee.pubkeys[0];
+    let witness = lc::CommitteeWitness { aggregate: signer_point, ..honest.clone() };
+    assert_eq!(verify(&relabelled, &witness).unwrap_err(), Error::CommitteeMismatch);
 }

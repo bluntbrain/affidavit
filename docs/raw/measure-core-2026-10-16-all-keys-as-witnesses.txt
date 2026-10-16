@@ -1,0 +1,110 @@
+# Earlier design, kept for DECISIONS.md D3: all 512 committee keys supplied as uncompressed witnesses.
+# Replaced by the committed aggregate minus the non-signers (measure-core-2026-10-16.txt).
+
+RISC Zero executor, risc0-zkvm 3.0.5, accelerated forks (bigint2, sha2), keccak in software
+mainnet fixtures; header accumulator of 65536 leaves for consumer paths
+
+update with handoff, keys decompressed and subgroup-checked (baseline) [zkcrypto guest]
+  user cycles   1217503913   padded   1295122432   segments 1236
+    decode input                                         698092
+    verify_update, total (zkcrypto)                   549236726
+      committee root (512 keys, SSZ)                    1928665
+      execution, finality and handoff branches          2012742
+      signing root and signer set                         25033
+      keys: decompress + subgroup check               517166736
+      aggregate signer keys                             4536082
+      hash to G2                                        2748495
+      signature decode + subgroup check                 1426155
+      Miller loops (2)                                  8745906
+      final exponentiation                             10693592
+
+update with handoff, keys decompressed and subgroup-checked (baseline) [blst guest]
+  user cycles    908175792   padded    960626688   segments 917
+    decode input                                         698092
+    verify_update, total (blst)                       239908625
+      committee root (512 keys, SSZ)                    1928665
+      execution, finality and handoff branches          2012742
+      signing root and signer set                         25033
+      keys: decompress + subgroup check               517166736
+      aggregate signer keys                             4536082
+      hash to G2                                        2748495
+      signature decode + subgroup check                 1426155
+      Miller loops (2)                                  8745906
+      final exponentiation                             10693592
+
+update with handoff, keys as uncompressed witnesses (the program's path) [zkcrypto guest]
+  user cycles    187327800   padded    198443008   segments 190
+    decode input                                        1286214
+    verify_update, total (zkcrypto)                    33823787
+      committee root (512 keys, SSZ)                    1928665
+      execution, finality and handoff branches          2012742
+      signing root and signer set                         25033
+      keys: witness on curve, recompresses to commitment      1738929
+      aggregate signer keys                             4536082
+      hash to G2                                        2748495
+      signature decode + subgroup check                 1426155
+      Miller loops (2)                                  8745906
+      final exponentiation                             10693592
+
+update with handoff, keys as uncompressed witnesses (the program's path) [blst guest]
+  user cycles    171535067   padded    181534720   segments 174
+    decode input                                        1286214
+    verify_update, total (blst)                        18031068
+      committee root (512 keys, SSZ)                    1928665
+      execution, finality and handoff branches          2012742
+      signing root and signer set                         25033
+      keys: witness on curve, recompresses to commitment      1738929
+      aggregate signer keys                             4536082
+      hash to G2                                        2748495
+      signature decode + subgroup check                 1426155
+      Miller loops (2)                                  8745906
+      final exponentiation                             10693592
+
+finality update, no handoff, keys as uncompressed witnesses [zkcrypto guest]
+  user cycles    183158939   padded    193986560   segments 185
+    decode input                                         983023
+    verify_update, total (zkcrypto)                    31888919
+      committee root (512 keys, SSZ)                    1928665
+      execution, finality and handoff branches            84192
+      signing root and signer set                         25033
+      keys: witness on curve, recompresses to commitment      1738929
+      aggregate signer keys                             4536082
+      hash to G2                                        2748495
+      signature decode + subgroup check                 1426159
+      Miller loops (2)                                  8745906
+      final exponentiation                             10693592
+
+finality update, no handoff, keys as uncompressed witnesses [blst guest]
+  user cycles    167365850   padded    177209344   segments 169
+    decode input                                         983023
+    verify_update, total (blst)                        16095844
+      committee root (512 keys, SSZ)                    1928665
+      execution, finality and handoff branches            84192
+      signing root and signer set                         25033
+      keys: witness on curve, recompresses to commitment      1738929
+      aggregate signer keys                             4536082
+      hash to G2                                        2748495
+      signature decode + subgroup check                 1426159
+      Miller loops (2)                                  8745906
+      final exponentiation                             10693592
+
+apply verified advance (public instance)
+  user cycles        27539   padded       131072   segments 1
+    decode input                                          12821
+    apply_advance (public instance actor)                  7881
+
+consumer: native ETH transfer (SSZ tx proof + ecrecover)
+  user cycles       828227   padded      1048576   segments 1
+    decode input                                          18594
+    attest_with_membership (total)                       801230
+
+consumer: ERC-20 Transfer log (receipt MPT proof)
+  user cycles       626712   padded      1048576   segments 1
+    decode input                                          19695
+    attest_with_membership (total)                       591002
+
+consumer: storage slot (account + storage MPT proofs)
+  user cycles      1319480   padded      1572864   segments 2
+    decode input                                          23243
+    attest_with_membership (total)                      1280031
+

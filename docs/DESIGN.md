@@ -62,8 +62,11 @@ its result is cheap. So the two are separate messages handled by separate actors
    state. The verifier checks participation (at least 342 of 512), slot ordering, that the
    signing committee is the one the instance tracks for that period, the execution payload
    branch of both headers, the finality branch, the handoff branch, and the aggregate
-   signature. It produces an `Advance` naming the state it was computed against and sends
-   it to the instance.
+   signature. The signers' key is the committee's committed aggregate key minus the keys
+   of the members that did not sign, all supplied as uncompressed points that must
+   compress to the committed bytes, so no key is ever decompressed (`DECISIONS.md` D3). It
+   produces an `Advance` naming the state it was computed against and sends it to the
+   instance.
 2. **Apply** (`lc::apply_advance`, compare-and-swap): the instance accepts an `Advance`
    only from its own program (`ReceiveInput::from_own_program()`), only if it was computed
    against the committee roots and period it holds now, and only if it moves something
@@ -78,16 +81,19 @@ fixed `PRIVATE_VERIFY_GAS = 409,764`, and `Simulator::handle_message` in
 `lee/state_machine` runs private transitions with no cycle cap ("bounded only by what its
 prover can prove").
 
-A whole update costs more than a public transaction may (see `COSTS.md`), so there are
-two ways to land it, from the same program code:
+Measured in the program binary (`COSTS.md`), `Verify` takes 14.6M cycles for an update
+that hands off the committee and 12.3M for a finality update, about 2M more at the
+minimum participation: more than a public transaction may use. So there are two ways to
+land it, from the same program code:
 
 - **Private verifier (preferred, design to validate in M0).** The submitter places the
   `Verify` actor privately: it proves the verification on its own machine and the
-  transaction carries one receipt. The only public execution is `Apply`, a few tens of
-  thousands of cycles. One transaction per update, about 0.41M gas plus `Apply`, instead
-  of three transactions near 5M each. It needs no BLS12-381 precompile, because BLS never
-  runs on the sequencer. The cost moves to the submitter's prover: about two minutes on a
-  GPU, about twenty on a laptop CPU at LEZ's measured proving rate. Tracking is periodic
+  transaction carries one receipt. The only public execution is `Apply` (about 57,000
+  cycles) and `Record` (19,600). One transaction per update, about 0.49M gas in all,
+  instead of 12M to 15M over at least two transactions in two blocks. It needs no
+  BLS12-381 precompile, because BLS never runs on the sequencer. The cost moves to the
+  submitter's prover: 15.9M padded cycles, about 19 minutes on an M2 Pro CPU at LEZ's
+  benchmarked proving rate and minutes on a GPU (M0 measures both). Tracking is periodic
   and latency-tolerant, so this is where the RFP's own reasoning puts it.
   The open question for M0 is concrete: on testnet 0.4, can a submitter place an actor
   of a public program privately with an empty (fresh) actor state, and does a

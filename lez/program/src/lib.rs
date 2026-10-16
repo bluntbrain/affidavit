@@ -10,13 +10,13 @@
 //! - **Header record** (public, write-once PDA per finalised header): what a public
 //!   consumer reads (Reliability #3).
 //! - **Verifier** (any actor of this program, normally run *privately*): checks an update
-//!   and sends the result to the instance. Placed privately, its 15M cycles are proven by
-//!   the submitter and the sequencer verifies one receipt instead of re-executing them.
+//!   and sends the result to the instance. Placed privately, its cycles are proven by the
+//!   submitter and the sequencer verifies one receipt instead of re-executing them.
 //!
 //! Every refusal is a panic carrying the same `AFF-xxx` code the CLI dry run prints.
 
-use affidavit_core::bls::Zkcrypto;
-use affidavit_core::lc::{self, Advance, Instance, InstanceConfig};
+use affidavit_core::bls::Blst;
+use affidavit_core::lc::{self, Advance, CommitteeWitness, Instance, InstanceConfig};
 use affidavit_core::mmr::MmrProof;
 use affidavit_core::ssz::sha256;
 use affidavit_core::statement::{attest, attest_with_membership, Evidence, Predicate, Statement};
@@ -31,9 +31,12 @@ use lee_core::program::{write_once, PdaSeed, ReceiveInput, Response, SyncMessage
 /// was built against a slightly older root still lands (Reliability #11).
 pub const RECENT_ROOTS: usize = 64;
 
-/// The BLS backend in the program. Committee keys are bound to the attested beacon state
-/// by the committee root, so their subgroup checks are skipped (`docs/DECISIONS.md` D3).
-const BLS: Zkcrypto = Zkcrypto { check_subgroups: false };
+/// The BLS backend in the program: supranational blst, through RISC Zero's accelerated fork
+/// in the zkVM. The signers' key is the committee's committed aggregate minus its
+/// non-signers, all as uncompressed witnesses checked against the committed bytes and
+/// bound to the attested beacon state by the committee root, so no key is decompressed or
+/// subgroup-checked (`docs/DECISIONS.md` D3).
+const BLS: Blst = Blst;
 
 #[derive(Debug, Clone, BorshSerialize, BorshDeserialize)]
 pub struct InstanceAccount {
@@ -55,8 +58,16 @@ pub enum Message {
     /// Anyone, to the instance PDA of `config`.
     Initialize { config: InstanceConfig, bootstrap: LightClientBootstrap, now_slot: u64 },
     /// Anyone, to any actor of this program. Verifies `update` against `snapshot` and asks
-    /// the instance to apply the result. Touches no state of its own.
-    Verify { snapshot: Instance, update: LightClientUpdate, committee: SyncCommittee, now_slot: u64 },
+    /// the instance to apply the result. Touches no state of its own. `witness` carries the
+    /// aggregate and non-signer keys uncompressed (`None`: decompress every signer's key
+    /// instead, at more than ten times the cost).
+    Verify {
+        snapshot: Instance,
+        update: LightClientUpdate,
+        committee: SyncCommittee,
+        witness: Option<CommitteeWitness>,
+        now_slot: u64,
+    },
     /// From this program only: compare-and-swap of the instance's tracked state.
     Apply(Advance),
     /// From this program only: write a finalised header record, once.
@@ -143,8 +154,10 @@ pub fn handle_message(input: &ReceiveInput) -> Response {
                 record,
             ))
         }
-        Message::Verify { snapshot, update, committee, now_slot } => {
-            let advance = lc::verify_update(&snapshot, &update, &committee, now_slot, &BLS).unwrap_or_else(|e| fail(e));
+        Message::Verify { snapshot, update, committee, witness, now_slot } => {
+            let advance =
+                lc::verify_update_with_witness(&snapshot, &update, &committee, witness.as_ref(), now_slot, &BLS)
+                    .unwrap_or_else(|e| fail(e));
             let instance_id = snapshot.config.id();
             Response::keep_state().send(
                 SyncMessage::new(instance_actor(program, &instance_id), &Message::Apply(advance))

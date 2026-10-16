@@ -22,7 +22,7 @@ testnet 0.4.
 
 ## What is written here, and why
 
-Under 2,000 lines in `crates/core`, comments and unit tests included:
+About 2,200 lines in `crates/core`, comments and unit tests included:
 
 - **The light-client rules** (`lc.rs`): the Altair `validate_light_client_update` and
   `apply_light_client_update`, restricted to an on-chain instance's needs (no optimistic
@@ -32,6 +32,11 @@ Under 2,000 lines in `crates/core`, comments and unit tests included:
   checked against Helios's real mainnet fixtures and the official consensus-spec-tests.
 - **SSZ merkleization for six containers** (`ssz.rs`, `types.rs`), checked against the
   published checkpoint root of the fixtures and against the spec vectors.
+- **BLS glue** (`bls.rs`): `FastAggregateVerify` through either library, and the
+  program's check of the committed aggregate minus witnessed non-signers. The only
+  arithmetic written here is a point negation on the encoding (`p − y`, a dozen lines);
+  everything else is library calls. Both paths reach the same verdict on every mainnet
+  update and spec vector.
 - **Statements, predicates, identifiers, the header accumulator** (`statement.rs`,
   `mmr.rs`): new by nature, since they are this primitive's interface.
 

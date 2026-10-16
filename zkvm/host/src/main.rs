@@ -2,10 +2,10 @@
 //! affidavit-core in the RISC Zero executor on real mainnet material and prints cycle
 //! counts, the number Performance #1, #2 and #8 of RFP-021 ask for.
 //!
-//! `-- --prove` also proves the consumer paths on this machine and reports time and size.
+//! Proving is not part of this host: cycle counts are exact and deterministic, while proof
+//! times depend on hardware; see `docs/COSTS.md` for how proving time is derived.
 
 use std::path::PathBuf;
-use std::time::Instant;
 
 use affidavit_core::bls::Blst;
 use affidavit_core::config::{weak_subjectivity_period_epochs, ChainSpec};
@@ -14,7 +14,7 @@ use affidavit_core::lc::{self, InstanceConfig};
 use affidavit_core::mmr::Mmr;
 use affidavit_core::ssz;
 use affidavit_core::statement::{Clause, Evidence, Field, Op, Predicate};
-use affidavit_core::types::HeaderRecord;
+use affidavit_core::types::{HeaderRecord, LightClientUpdate, SyncCommittee};
 use affidavit_io::follower::Follower;
 use affidavit_io::{beacon, rpc};
 use affidavit_zkvm_jobs::{Job, Report};
@@ -22,7 +22,7 @@ use alloy_consensus::{Transaction as _, TxEnvelope};
 use alloy_eips::eip2718::Decodable2718;
 use alloy_primitives::{b256, Bytes, B256, U256};
 use anyhow::{Context, Result};
-use risc0_zkvm::{default_executor, default_prover, ExecutorEnv, ProverOpts};
+use risc0_zkvm::{default_executor, ExecutorEnv};
 
 const CHECKPOINT: B256 = b256!("5afc212a7924789b2bc86acad3ab3a6ffb1f6e97253ea50bee7f4f51422c9275");
 const NOW_SLOT: u64 = 7_109_500;
@@ -50,31 +50,19 @@ struct Measured {
     user_cycles: u64,
     padded_cycles: u64,
     segments: usize,
-    prove: Option<(f64, usize)>,
 }
 
-fn execute(binary: &[u8], label: &str, job: &Job, prove: bool) -> Result<Measured> {
+fn execute(binary: &[u8], label: &str, job: &Job) -> Result<Measured> {
     let input = borsh::to_vec(job)?;
     let env = ExecutorEnv::builder().stdin(&input[..]).build()?;
     let session = default_executor().execute(env, binary)?;
     let report: Report = borsh::from_slice(&session.journal.bytes)?;
     let user_cycles = session.segments.iter().map(|s| s.cycles as u64).sum();
     let padded_cycles = session.segments.iter().map(|s| 1u64 << s.po2).sum();
-    let prove = if prove {
-        let env = ExecutorEnv::builder().stdin(&input[..]).build()?;
-        let started = Instant::now();
-        let info = default_prover().prove_with_opts(env, binary, &ProverOpts::succinct())?;
-        let seconds = started.elapsed().as_secs_f64();
-        let size = borsh::to_vec(&info.receipt.inner).map(|b| b.len()).unwrap_or(0);
-        Some((seconds, size))
-    } else {
-        None
-    };
-    Ok(Measured { label: label.into(), report, user_cycles, padded_cycles, segments: session.segments.len(), prove })
+    Ok(Measured { label: label.into(), report, user_cycles, padded_cycles, segments: session.segments.len() })
 }
 
 fn main() -> Result<()> {
-    let prove = std::env::args().any(|a| a == "--prove");
     let zkcrypto = program("target")?;
     // Built with `CARGO_TARGET_DIR=target-blst zkvm/build-guest.sh --features blst`.
     let blst = program("target-blst").ok();
@@ -101,36 +89,80 @@ fn main() -> Result<()> {
     let advance = lc::verify_update(&before_finality, &finality, &finality_committee, NOW_SLOT, &Blst)?;
     follower.process(&finality, NOW_SLOT)?;
 
-    let mut jobs: Vec<(String, Job, bool)> = Vec::new();
-    for check_subgroups in [true, false] {
-        let suffix = if check_subgroups { "subgroup-checked keys" } else { "keys bound by state root" };
-        jobs.push((
-            format!("update with committee handoff ({suffix})"),
-            Job::VerifyUpdate {
-                instance: before_handoff.clone(),
-                update: handoff.clone(),
-                committee: handoff_committee.clone(),
-                now_slot: NOW_SLOT,
-                check_subgroups,
-            },
-            false,
-        ));
+    // The worst participation an update can have and still count: 342 of 512 signed, so 170
+    // non-signers to subtract. Clearing bits of a real update makes its signature fail, but
+    // every step still runs in full, so the cycles are those of a valid update.
+    let mut sparse = handoff.clone();
+    let signers: Vec<usize> = (0..512).filter(|i| sparse.sync_aggregate.is_set(*i)).collect();
+    for &i in &signers[342..] {
+        sparse.sync_aggregate.sync_committee_bits[i / 8] &= !(1 << (i % 8));
     }
+
+    let witness = |committee: &SyncCommittee, update: &LightClientUpdate| {
+        Some(Follower::committee_witness(committee, &update.sync_aggregate))
+    };
+    // (label, job, expected verdict)
+    let mut jobs: Vec<(String, Job, u16)> = Vec::new();
+    // Baseline: what a straight port does, decompressing and subgroup-checking every signer's key.
     jobs.push((
-        "finality update, no handoff (keys bound by state root)".into(),
+        "update with handoff, keys decompressed and subgroup-checked (baseline)".into(),
         Job::VerifyUpdate {
-            instance: before_finality.clone(),
-            update: finality.clone(),
-            committee: finality_committee,
+            instance: before_handoff.clone(),
+            update: handoff.clone(),
+            committee: handoff_committee.clone(),
+            witness: None,
+            now_slot: NOW_SLOT,
+            check_subgroups: true,
+        },
+        0,
+    ));
+    // The program's path: the committed aggregate minus the witnessed non-signers.
+    jobs.push((
+        format!(
+            "update with handoff, aggregate minus {} non-signers (the program's path)",
+            512 - handoff.sync_aggregate.participants()
+        ),
+        Job::VerifyUpdate {
+            instance: before_handoff.clone(),
+            update: handoff.clone(),
+            committee: handoff_committee.clone(),
+            witness: witness(&handoff_committee, &handoff),
             now_slot: NOW_SLOT,
             check_subgroups: false,
         },
-        false,
+        0,
+    ));
+    jobs.push((
+        "same update at the 342/512 minimum: 170 non-signers (signature refused, cost representative)".into(),
+        Job::VerifyUpdate {
+            instance: before_handoff.clone(),
+            update: sparse.clone(),
+            committee: handoff_committee.clone(),
+            witness: witness(&handoff_committee, &sparse),
+            now_slot: NOW_SLOT,
+            check_subgroups: false,
+        },
+        affidavit_core::Error::SyncCommitteeSignatureInvalid.code(),
+    ));
+    jobs.push((
+        format!(
+            "finality update, no handoff, aggregate minus {} non-signers",
+            512 - finality.sync_aggregate.participants()
+        ),
+        Job::VerifyUpdate {
+            instance: before_finality.clone(),
+            update: finality.clone(),
+            committee: finality_committee.clone(),
+            witness: witness(&finality_committee, &finality),
+            now_slot: NOW_SLOT,
+            check_subgroups: false,
+        },
+        0,
     ));
     jobs.push((
         "apply verified advance (public instance)".into(),
         Job::ApplyAdvance { instance: before_finality, advance },
-        false,
+        0,
     ));
 
     // Consumers prove membership in a header accumulator sized for years of operation.
@@ -221,30 +253,28 @@ fn main() -> Result<()> {
                 evidence,
                 predicate,
             },
-            prove,
+            0,
         ));
     }
 
     println!("RISC Zero executor, risc0-zkvm 3.0.5, accelerated forks (bigint2, sha2), keccak in software");
     println!("mainnet fixtures; header accumulator of {leaves} leaves for consumer paths\n");
-    for (label, job, prove_it) in &jobs {
+    for (label, job, expected) in &jobs {
         let mut binaries = vec![("zkcrypto", &zkcrypto)];
         if let (Job::VerifyUpdate { .. }, Some(blst)) = (job, blst.as_ref()) {
             binaries.push(("blst", blst));
         }
         for (backend, binary) in binaries {
-            let m = execute(binary, label, job, *prove_it)?;
-            assert_eq!(m.report.verdict, 0, "{label} refused with AFF-{}", m.report.verdict);
-            let tag = if matches!(job, Job::VerifyUpdate { .. }) { format!(" [{backend} guest]") } else { String::new() };
+            let m = execute(binary, label, job)?;
+            assert_eq!(m.report.verdict, *expected, "{label}: verdict AFF-{}", m.report.verdict);
+            let tag =
+                if matches!(job, Job::VerifyUpdate { .. }) { format!(" [{backend} guest]") } else { String::new() };
             println!(
                 "{}{tag}\n  user cycles {:>12}   padded {:>12}   segments {}",
                 m.label, m.user_cycles, m.padded_cycles, m.segments
             );
             for (phase, cycles) in &m.report.phases {
                 println!("    {phase:<46} {cycles:>12}");
-            }
-            if let Some((seconds, size)) = m.prove {
-                println!("  proved (succinct) in {seconds:.1} s on this machine, receipt {size} bytes");
             }
             println!();
         }

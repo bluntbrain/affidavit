@@ -56,7 +56,10 @@ pub fn run(dir: &Path) -> Result<()> {
     );
     let mut follower = Follower::new(config, &bootstrap, NOW_SLOT)?;
     println!("  instance id       {}", follower.instance.config.id());
-    println!("  weak-subjectivity limit {} epochs\n", follower.instance.config.ws_period_epochs);
+    println!(
+        "  weak-subjectivity limit {} epochs (at the ~24M ETH staked when these blocks were made)\n",
+        follower.instance.config.ws_period_epochs
+    );
 
     println!("[2/5] Following the sync committee (BLS aggregate checked on every step)");
     let updates = beacon::parse_updates(&read(dir, "mainnet/light-client/updates.json")?)?;

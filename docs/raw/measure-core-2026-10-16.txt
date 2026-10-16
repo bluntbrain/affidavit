@@ -1,0 +1,135 @@
+RISC Zero executor, risc0-zkvm 3.0.5, accelerated forks (bigint2, sha2), keccak in software
+mainnet fixtures; header accumulator of 65536 leaves for consumer paths
+
+update with handoff, keys decompressed and subgroup-checked (baseline) [zkcrypto guest]
+  user cycles   1217499629   padded   1294467072   segments 1235
+    decode input                                         698579
+    verify_update, total (zkcrypto)                   549236839
+      committee root (512 keys, SSZ)                    1928665
+      execution, finality and handoff branches          2012745
+      signing root and signer set                         31702
+      keys: decompress + subgroup check               517156501
+      signers' key: add up the signers                  4535026
+      hash to G2                                        2748192
+      signature decode + subgroup check                 1426154
+      Miller loops (2)                                  8745906
+      final exponentiation                             10693562
+
+update with handoff, keys decompressed and subgroup-checked (baseline) [blst guest]
+  user cycles    908171318   padded    961019904   segments 917
+    decode input                                         698579
+    verify_update, total (blst)                       239908734
+      committee root (512 keys, SSZ)                    1928665
+      execution, finality and handoff branches          2012745
+      signing root and signer set                         31702
+      keys: decompress + subgroup check               517156501
+      signers' key: add up the signers                  4535026
+      hash to G2                                        2748192
+      signature decode + subgroup check                 1426154
+      Miller loops (2)                                  8745906
+      final exponentiation                             10693562
+
+update with handoff, aggregate minus 0 non-signers (the program's path) [zkcrypto guest]
+  user cycles    174186825   padded    184549376   segments 176
+    decode input                                         699552
+    verify_update, total (zkcrypto)                    27608953
+      committee root (512 keys, SSZ)                    1928665
+      execution, finality and handoff branches          2012745
+      signing root and signer set                         31702
+      keys: aggregate + 0 non-signer witnesses checked         3945
+      signers' key: aggregate minus non-signers            1795
+      hash to G2                                        2748192
+      signature decode + subgroup check                 1426154
+      Miller loops (2)                                  8745906
+      final exponentiation                             10693562
+
+update with handoff, aggregate minus 0 non-signers (the program's path) [blst guest]
+  user cycles    160230472   padded    169869312   segments 162
+    decode input                                         699552
+    verify_update, total (blst)                        13652631
+      committee root (512 keys, SSZ)                    1928665
+      execution, finality and handoff branches          2012745
+      signing root and signer set                         31702
+      keys: aggregate + 0 non-signer witnesses checked         3931
+      signers' key: aggregate minus non-signers            1795
+      hash to G2                                        2748192
+      signature decode + subgroup check                 1426154
+      Miller loops (2)                                  8745906
+      final exponentiation                             10693562
+
+same update at the 342/512 minimum: 170 non-signers (signature refused, cost representative) [zkcrypto guest]
+  user cycles    147289156   padded    156237824   segments 149
+    decode input                                         901173
+    verify_update, total (zkcrypto)                    29729640
+      committee root (512 keys, SSZ)                    1928665
+      execution, finality and handoff branches          2012745
+      signing root and signer set                         33249
+      keys: aggregate + 170 non-signer witnesses checked       567267
+      signers' key: aggregate minus non-signers         1548338
+      hash to G2                                        2748192
+      signature decode + subgroup check                 1426154
+      Miller loops (2)                                  8745906
+      final exponentiation                             10693562
+
+same update at the 342/512 minimum: 170 non-signers (signature refused, cost representative) [blst guest]
+  user cycles    133207545   padded    141557760   segments 135
+    decode input                                         901173
+    verify_update, total (blst)                        15648098
+      committee root (512 keys, SSZ)                    1928665
+      execution, finality and handoff branches          2012745
+      signing root and signer set                         33249
+      keys: aggregate + 170 non-signer witnesses checked       567215
+      signers' key: aggregate minus non-signers         1548338
+      hash to G2                                        2748192
+      signature decode + subgroup check                 1426154
+      Miller loops (2)                                  8745906
+      final exponentiation                             10693562
+
+finality update, no handoff, aggregate minus 0 non-signers [zkcrypto guest]
+  user cycles    169991076   padded    179568640   segments 172
+    decode input                                         405560
+    verify_update, total (zkcrypto)                    25674089
+      committee root (512 keys, SSZ)                    1928665
+      execution, finality and handoff branches            84195
+      signing root and signer set                         31702
+      keys: aggregate + 0 non-signer witnesses checked         3945
+      signers' key: aggregate minus non-signers            1795
+      hash to G2                                        2748192
+      signature decode + subgroup check                 1426158
+      Miller loops (2)                                  8745906
+      final exponentiation                             10693562
+
+finality update, no handoff, aggregate minus 0 non-signers [blst guest]
+  user cycles    156034365   padded    164757504   segments 158
+    decode input                                         405560
+    verify_update, total (blst)                        11717409
+      committee root (512 keys, SSZ)                    1928665
+      execution, finality and handoff branches            84195
+      signing root and signer set                         31702
+      keys: aggregate + 0 non-signer witnesses checked         3931
+      signers' key: aggregate minus non-signers            1795
+      hash to G2                                        2748192
+      signature decode + subgroup check                 1426158
+      Miller loops (2)                                  8745906
+      final exponentiation                             10693562
+
+apply verified advance (public instance)
+  user cycles        27815   padded       131072   segments 1
+    decode input                                          13097
+    apply_advance (public instance actor)                  7880
+
+consumer: native ETH transfer (SSZ tx proof + ecrecover)
+  user cycles       828466   padded      1048576   segments 1
+    decode input                                          18835
+    attest_with_membership (total)                       801229
+
+consumer: ERC-20 Transfer log (receipt MPT proof)
+  user cycles       626946   padded      1048576   segments 1
+    decode input                                          19931
+    attest_with_membership (total)                       591001
+
+consumer: storage slot (account + storage MPT proofs)
+  user cycles      1319733   padded      1572864   segments 2
+    decode input                                          23498
+    attest_with_membership (total)                      1280030
+

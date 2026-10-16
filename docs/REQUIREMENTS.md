@@ -56,10 +56,10 @@ specified in the docs with the mechanism chosen; **Mn** is the milestone in the 
 
 | # | Requirement | Status | Evidence / milestone |
 |---|---|---|---|
-| P1 | Attestation within one transaction | Measured: consumer paths are far below the cap | `COSTS.md` |
-| P2 | Cost by action: cycles, gas, proof time, proof size | Cycles done; gas and proving on testnet M1/M2 | `COSTS.md`; `zkvm/host` |
-| P3 | Amortised tracking cost per attestation | Done (model) | `COSTS.md` |
-| P4 | Private proving practical on desktop; minimum spec stated | M2 (laptops); this machine's numbers in `COSTS.md` | |
+| P1 | Attestation within one transaction | Measured: 0.6M to 1.3M cycles per consumer path against the 10M cap | `COSTS.md`; `measure_lez` |
+| P2 | Cost by action: cycles, gas, proof time, proof size | Cycles and gas measured per program action in the executor; proof time and size measured on testnet in M0 and M2 | `COSTS.md`; `zkvm/host` |
+| P3 | Amortised tracking cost per attestation | Done (model on measured gas) | `COSTS.md` |
+| P4 | Private proving practical on desktop; minimum spec stated | Estimated (about 1.5 to 2 min per private attestation on an M2 Pro CPU); measured on laptops in M2 | `COSTS.md` |
 | P5 | End-to-end latency breakdown | Done (model) | `COSTS.md` |
 | P6 | Off-chain compute resources | Done | `OPERATOR.md`, `COSTS.md` |
 | P7 | Storage growth, 1 and 5 years | Done | `COSTS.md` |

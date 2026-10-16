@@ -1,0 +1,14 @@
+LEZ program binary (lee_core d7ba18f, actor model), RISC Zero executor 3.0.5, mainnet fixtures
+
+| action | runs | user cycles | padded cycles |
+|---|---|---:|---:|
+| Initialize (bootstrap check, once per instance) | public | 2523572 | 3145728 |
+| Verify (update with handoff) | private: proven by the submitter | 14583345 | 15859712 |
+| Apply (instance compare-and-swap) | public | 55296 | 131072 |
+| Record (write-once header record) | public | 19600 | 65536 |
+| Verify (finality update) | private: proven by the submitter | 12251079 | 13631488 |
+| Apply (instance compare-and-swap) | public | 58786 | 131072 |
+| Record (write-once header record) | public | 19600 | 65536 |
+| AttestRecord (native ETH transfer, public consumer) | public | 813571 | 1048576 |
+| AttestPrivate (native ETH transfer, private consumer) | private: proven by the user | 818024 | 1048576 |
+| CheckRoot (the private path's public crossing) | public | 27855 | 131072 |
