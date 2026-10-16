@@ -1,0 +1,26 @@
+[package]
+name = "affidavit-io"
+description = "Decoding of Beacon API, JSON-RPC and consensus-spec-test material into affidavit-core types, and the prover-side proof builders"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+affidavit-core.workspace = true
+alloy-primitives = { workspace = true, features = ["std", "serde"] }
+alloy-rlp.workspace = true
+alloy-trie = { workspace = true, features = ["std"] }
+alloy-consensus = { workspace = true, features = ["std"] }
+alloy-eips = { workspace = true, features = ["std"] }
+serde = { workspace = true, features = ["std"] }
+serde_json.workspace = true
+serde_yaml.workspace = true
+snap.workspace = true
+hex.workspace = true
+anyhow.workspace = true
+
+[dev-dependencies]
+blst.workspace = true
+affidavit-core = { workspace = true, features = ["zkcrypto", "borsh"] }

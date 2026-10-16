@@ -1,0 +1,12 @@
+[package]
+name = "affidavit-zkvm-jobs"
+description = "Measurement jobs shared by the zkVM guest and its host"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+affidavit-core = { path = "../../crates/core", default-features = false, features = ["borsh"] }
+alloy-primitives = { version = "1.4", default-features = false, features = ["borsh"] }
+borsh = { version = "1.5", default-features = false, features = ["derive"] }

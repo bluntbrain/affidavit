@@ -1,0 +1,26 @@
+[package]
+name = "affidavit-cli"
+description = "CLI: follow the sync committee, produce and dry-run attestations, verify checkpoints"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "affidavit"
+path = "src/main.rs"
+
+[dependencies]
+affidavit-core.workspace = true
+affidavit-io.workspace = true
+alloy-primitives = { workspace = true, features = ["std"] }
+alloy-consensus = { workspace = true, features = ["std"] }
+alloy-eips = { workspace = true, features = ["std"] }
+alloy-rlp.workspace = true
+alloy-trie = { workspace = true, features = ["std"] }
+blst.workspace = true
+clap.workspace = true
+anyhow.workspace = true
+serde_json.workspace = true
+hex.workspace = true

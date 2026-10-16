@@ -1,0 +1,13 @@
+[package]
+name = "affidavit-sim"
+description = "Simulates independent operators advancing one instance: who pays, how much is wasted, how late updates land"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+affidavit-core.workspace = true
+alloy-primitives = { workspace = true, features = ["std"] }

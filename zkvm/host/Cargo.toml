@@ -1,0 +1,25 @@
+[package]
+name = "affidavit-zkvm-host"
+description = "Executes the measurement guest in the RISC Zero executor and reports cycles"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[workspace]
+
+[dependencies]
+affidavit-core = { path = "../../crates/core", features = ["borsh"] }
+affidavit-io = { path = "../../crates/io" }
+affidavit-zkvm-jobs = { path = "../jobs" }
+alloy-primitives = "1.4"
+alloy-consensus = "2"
+alloy-eips = "2"
+borsh = "1.5"
+anyhow = "1"
+risc0-zkvm = { version = "=3.0.5", features = ["prove"] }
+risc0-binfmt = "=3.0.4"
+risc0-zkos-v1compat = "=2.2.2"
+
+[profile.release]
+opt-level = 3

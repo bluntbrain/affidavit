@@ -1,0 +1,37 @@
+[package]
+name = "affidavit-core"
+description = "Verification core: sync-committee light client, execution inclusion proofs, predicates and verified statements"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[features]
+default = ["std", "blst"]
+std = ["alloy-primitives/std", "alloy-rlp/std", "alloy-trie/std", "alloy-consensus/std", "sha2/std"]
+# Native BLS12-381 backend (supranational blst). Inside the zkVM the same crate is
+# swapped for RISC Zero's accelerated fork through a [patch] section.
+blst = ["dep:blst"]
+serde = ["dep:serde", "alloy-primitives/serde"]
+# Borsh encoding for every type, which is how LEZ programs receive instruction data.
+borsh = ["dep:borsh", "alloy-primitives/borsh"]
+# zkcrypto `bls12_381` backend, the BLS library r0vm-helios and SP1 Helios use. RISC Zero
+# ships an accelerated fork of it.
+zkcrypto = ["dep:bls12_381", "dep:sha2_09"]
+
+[dependencies]
+alloy-primitives.workspace = true
+alloy-rlp.workspace = true
+alloy-trie.workspace = true
+alloy-consensus.workspace = true
+alloy-eips.workspace = true
+sha2.workspace = true
+blst = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
+borsh = { version = "1.5", default-features = false, features = ["derive"], optional = true }
+bls12_381 = { version = "0.8", default-features = false, features = ["groups", "pairings", "alloc", "experimental"], optional = true }
+sha2_09 = { package = "sha2", version = "0.9", default-features = false, optional = true }
+
+[dev-dependencies]
+hex.workspace = true
