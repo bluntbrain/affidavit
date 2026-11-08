@@ -21,7 +21,10 @@ From LEZ `main` (`lez/programs/fee/core`):
 
 The program binary (`lez/build-program.sh`, LEZ `lee_core` at v0.4.0-rc1, blst through
 RISC Zero's accelerated fork) executed in the RISC Zero executor with LEZ's own input
-framing (`to_borsh_frame` of a `ReceiveInput`):
+framing (`to_borsh_frame` of a `ReceiveInput`). The program-facing `lee_core` source
+(`program/mod.rs`, `account.rs`, `actor_state.rs`) is byte-identical between the earlier
+pinned commit and v0.4.0-rc1, so these cycle counts hold unchanged across the move to the
+testnet-0.4 line:
 
 ```console
 lez/build-program.sh
