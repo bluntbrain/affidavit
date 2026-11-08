@@ -26,7 +26,7 @@ ishan.lakhwani@gmail.com · Telegram @bluntbrainsol
 **Ishan Lakhwani** (bluntbrain)
 - Social links: [github.com/bluntbrain](https://github.com/bluntbrain) · [bluntbrain.com](https://bluntbrain.com) · [linkedin.com/in/ishanl](https://linkedin.com/in/ishanl) · [x.com/bluntbrain](https://x.com/bluntbrain)
 - Role: everything in this proposal: light client and LEZ program, inclusion proofs and statements, core module, update daemon, CLI, cost measurement, docs
-- Status: part-time, 30+ hours a week for the whole grant (the timeline below is planned at that pace)
+- Status: full-time for the whole grant
 
 The independent audit (Supportability #8) is done by a third-party firm, scoped and quoted
 during the grant so Logos can contract it directly (see Milestones).
@@ -169,7 +169,7 @@ milestone is a tagged release with green CI, updated docs and the decision log. 
 prototype already builds and passes its tests against `lee_core` at **v0.4.0-rc1**, so M0
 starts from a program that targets the testnet-0.4 line rather than porting to it later.
 
-**M0 — LEZ 0.4 placement and cost baseline** · 2 weeks · $4,000
+**M0 — LEZ 0.4 placement and cost baseline** · 2 weeks · $3,000
 On a standalone LEZ 0.4 sequencer: the private placement of `Verify` end to end (the one
 LEZ behaviour the one-transaction cost depends on), or the public split if it does not
 hold; measured cycles, gas, proof time and proof size for update, apply and each consumer
@@ -177,27 +177,27 @@ path on 0.4; whether LEZ can verify an arbitrary RISC Zero receipt (composition)
 reproducible program build with its image id checked in CI; reuse assessment finished with
 those numbers; design freeze.
 
-**M1 — Light client on testnet 0.4** · 3 weeks · $9,000
+**M1 — Light client on testnet 0.4** · 3 weeks · $8,000
 Program deployed to the public LEZ testnet (0.4): initialise, verify, apply, header
 records, accumulator; live instances for Hoodi, Sepolia (Gloas) and mainnet; permissionless
 advancing from unknown accounts; the whole adversarial suite run against the sequencer, with
 an on-chain verification script and a mutation test; typed errors.
 
-**M2 — Attestation, consumers, cost report** · 3 weeks · $9,000
+**M2 — Attestation, consumers, cost report** · 3 weeks · $8,000
 Public and private consumer paths on testnet; reference consumers (ERC-20 and native ETH to
 a contract) with the recommended consumer pattern; the same contract address across mainnet
 and a testnet (#F5); SPEL IDL; end-to-end tests against a standalone sequencer and Hoodi in
 CI; the full cost report (#P1–#P9) including private proving on a mid-range laptop and the
 minimum spec; audit quotes collected.
 
-**M3 — Core module, CLI, update daemon** · 3 weeks · $9,000
+**M3 — Core module, CLI, update daemon** · 3 weeks · $8,000
 Logos core module (produce, verify, submit, read configuration, verify checkpoint);
 CLI on top of it with dry runs returning on-chain error codes; update daemon as a Logos
 module plus headless CLI: deferral, check-before-submit, proving hints over Logos
 Messaging, metrics and stall alerts, restart without re-verification, clean shutdown;
 operator and CLI docs.
 
-**M4 — Release and handover** · 1 week · $4,000
+**M4 — Release and handover** · 1 week · $3,000
 Module catalog from the template, built and released with the release action; a public
 operator running for the testnet instances; final docs; audit-ready package (spec, threat
 model, vectors, traceability matrix).
@@ -223,7 +223,7 @@ delivered separately.
 
 ## Total Requested Budget (USD)
 
-$38,000
+$33,000
 
 ## Relevant Experience
 
