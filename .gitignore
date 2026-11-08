@@ -3,3 +3,4 @@ target-*/
 **/target/
 **/target-*/
 *.profraw
+bridge/target/

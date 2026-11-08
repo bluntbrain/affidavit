@@ -25,7 +25,7 @@ jobs:
       - run: cargo run --release -p affidavit-sim
 
   lez-program:
-    name: LEZ program handlers (lee_core at the pinned commit)
+    name: LEZ program handlers (lee_core v0.4.0-rc1)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +34,21 @@ jobs:
         with:
           workspaces: lez/program
       - run: cargo test --release --manifest-path lez/program/Cargo.toml
+
+  bridge-demo:
+    name: Causeway mint-authorisation seam (RFP-022 demo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: bridge
+      - run: cargo fmt --check --manifest-path bridge/Cargo.toml
+      - run: cargo clippy --manifest-path bridge/Cargo.toml --all-targets -- -D warnings
+      - run: cargo test --release --manifest-path bridge/Cargo.toml
 
   zkvm-guest:
     name: RISC Zero builds of the guest and the LEZ program (nightly, build-std, no rzup)

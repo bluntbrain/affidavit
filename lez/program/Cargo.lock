@@ -2022,7 +2022,7 @@ dependencies = [
 [[package]]
 name = "lee_core"
 version = "0.1.0"
-source = "git+https://github.com/logos-blockchain/logos-execution-zone?rev=d7ba18f577184133e256511a14afa2951ca2a2a0#d7ba18f577184133e256511a14afa2951ca2a2a0"
+source = "git+https://github.com/logos-blockchain/logos-execution-zone?tag=v0.4.0-rc1#1806e873ea2ac0e1b608aa7cf2f9b6e1fb12db21"
 dependencies = [
  "base58",
  "borsh",

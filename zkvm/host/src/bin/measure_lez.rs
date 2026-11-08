@@ -104,7 +104,7 @@ fn main() -> Result<()> {
     let verifier = Actor::new(AccountId::new([0x51; 32]), program);
     let consumer = Actor::new(AccountId::new([0xc0; 32]), AccountId::new([0xc1; 32]));
 
-    println!("LEZ program binary (lee_core d7ba18f, actor model), RISC Zero executor 3.0.5, mainnet fixtures\n");
+    println!("LEZ program binary (lee_core v0.4.0-rc1, actor model), RISC Zero executor 3.0.5, mainnet fixtures\n");
     println!("| action | runs | user cycles | padded cycles |");
     println!("|---|---|---:|---:|");
 

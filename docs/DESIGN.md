@@ -7,8 +7,8 @@ chain), **inclusion** (the state or event is under that header), **predicate** (
 consumer-supplied condition holds). The output is a `Statement`; minting, escrow release
 and every other action belong to the consumer.
 
-This document describes the program on LEZ `main` (the actor model heading to testnet
-v0.4), the reasons for its shape, and what is still to be validated. Every claim marked
+This document describes the program on LEZ's testnet-0.4 line (`lee_core` at v0.4.0-rc1),
+the reasons for its shape, and what is still to be validated. Every claim marked
 **prototype** is implemented and tested in this repository; **design** is the plan for
 the grant milestones.
 
@@ -74,12 +74,33 @@ its result is cheap. So the two are separate messages handled by separate actors
 
 ### Where the 15M cycles are paid
 
-LEZ runs the same RISC-V binary in two modes. A public actor is executed by the
-sequencer under `MAX_GAS_EXEC = 10,000,000` per transaction (and per block). A private
-actor is executed and proven by the submitter; the sequencer verifies one receipt at a
-fixed `PRIVATE_VERIFY_GAS = 409,764`, and `Simulator::handle_message` in
-`lee/state_machine` runs private transitions with no cycle cap ("bounded only by what its
-prover can prove").
+A whole update is heavier than a single public transaction may be. There are two ways to
+land it from the same program code; the choice is where the BLS work runs.
+
+```mermaid
+flowchart TB
+  subgraph A["Private verifier — the preferred path (1 transaction)"]
+    direction LR
+    a1["Submitter proves<br/>Verify off-chain<br/>(15.9M cycles,<br/>one receipt)"] -->|"1 private tx<br/>≈0.49M gas"| a2["Sequencer verifies<br/>the receipt, runs<br/>Apply + Record"]
+    a2 --> a3["Instance advanced"]
+  end
+  subgraph B["Public verifier — the fallback (≥3 transactions)"]
+    direction LR
+    b1["Begin<br/>≈5M gas"] -->|public tx 1| b2["Miller<br/>≈4M gas"]
+    b2 -->|public tx 2| b3["Finish + Apply<br/>≈4M gas"]
+    b3 --> b4["Instance advanced"]
+  end
+```
+
+The preferred path puts the BLS verification in a *private* actor the submitter proves,
+so the sequencer never runs it: **one transaction at about 0.49M gas**, against roughly
+12–15M gas split over at least two public transactions in two blocks for the fallback, and
+no BLS12-381 precompile either way. LEZ runs the same RISC-V binary in two modes. A public
+actor is executed by the sequencer under `MAX_GAS_EXEC = 10,000,000` per transaction (and
+per block). A private actor is executed and proven by the submitter; the sequencer
+verifies one receipt at a fixed `PRIVATE_VERIFY_GAS = 409,764`, and
+`Simulator::handle_message` in `lee/state_machine` runs private transitions with no cycle
+cap ("bounded only by what its prover can prove").
 
 Measured in the program binary (`COSTS.md`), `Verify` takes 14.6M cycles for an update
 that hands off the committee and 12.3M for a finality update, about 2M more at the

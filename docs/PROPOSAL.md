@@ -57,7 +57,8 @@ verified, attests WETH and USDC transfers and a storage slot, passes the officia
 consensus-spec-tests light-client vectors for Deneb and Electra, and refuses every attack
 the RFP lists (fabricated chain, 341/512 signatures, a foreign committee, tampered roots,
 replays, other networks) with a typed error code. `cargo run -p affidavit-cli -- demo`
-shows all of it in one run. The LEZ program is written for the actor model on LEZ `main`;
+shows all of it in one run. The LEZ program is written for the actor model of LEZ's
+testnet-0.4 line and **builds and passes its tests against `lee_core` at v0.4.0-rc1**;
 driven through LEZ's own message types across all the mainnet updates, it ends in exactly
 the state the native light client reaches. Its binary is measured action by action in the
 RISC Zero executor, and a private consumer attestation is proven for real into a
@@ -74,8 +75,8 @@ for.
 
 ## Technical Approach
 
-**Stack.** Rust; LEZ programs on the actor model of LEZ `main` (the codebase after v0.3;
-SPEL for the IDL); RISC Zero 3.0 with RISC Zero's accelerated forks of `blst`, `sha2` and
+**Stack.** Rust; LEZ programs on the actor model of LEZ's testnet-0.4 line (`lee_core` at
+v0.4.0-rc1; SPEL for the IDL); RISC Zero 3.0 with RISC Zero's accelerated forks of `blst`, `sha2` and
 `k256`; `alloy-trie`/`alloy-consensus` for Merkle-Patricia proofs and decoding; the Logos
 Ethereum core module (`eth_rpc_module` with the Nimbus verified proxy) for every Ethereum
 read; Logos modules for the core module and daemon, with the Rust library behind a C ABI
@@ -164,28 +165,32 @@ verification exposed through the core module.
 ## Milestones, Payout and Timeline
 
 Twelve weeks of build, inside the RFP's 8 to 12, plus remediation after the audit. Every
-milestone is a tagged release with green CI, updated docs and the decision log.
+milestone is a tagged release with green CI, updated docs and the decision log. The
+prototype already builds and passes its tests against `lee_core` at **v0.4.0-rc1**, so M0
+starts from a program that targets the testnet-0.4 line rather than porting to it later.
 
-**M0 — LEZ 0.4 validation and cost baseline** · 2 weeks · $5,000
-On LEZ testnet 0.4 (or `main` in standalone mode if 0.4 is not out): the private placement
-of `Verify` end to end, or the public split if it does not hold; measured cycles, gas,
-proof time and proof size for update, apply and each consumer path; whether LEZ can verify
-an arbitrary RISC Zero receipt (composition); reproducible program build with its image id
-checked in CI; reuse assessment finished with those numbers; design freeze.
+**M0 — LEZ 0.4 placement and cost baseline** · 2 weeks · $4,000
+On a standalone LEZ 0.4 sequencer: the private placement of `Verify` end to end (the one
+LEZ behaviour the one-transaction cost depends on), or the public split if it does not
+hold; measured cycles, gas, proof time and proof size for update, apply and each consumer
+path on 0.4; whether LEZ can verify an arbitrary RISC Zero receipt (composition);
+reproducible program build with its image id checked in CI; reuse assessment finished with
+those numbers; design freeze.
 
-**M1 — Light client on testnet** · 3 weeks · $11,000
-Program on LEZ testnet 0.4: initialise, verify, apply, header records, accumulator;
-instances for Hoodi and mainnet; permissionless advancing from unknown accounts; the whole
-adversarial suite run against the sequencer; typed errors.
+**M1 — Light client on testnet 0.4** · 3 weeks · $9,000
+Program deployed to the public LEZ testnet (0.4): initialise, verify, apply, header
+records, accumulator; live instances for Hoodi, Sepolia (Gloas) and mainnet; permissionless
+advancing from unknown accounts; the whole adversarial suite run against the sequencer, with
+an on-chain verification script and a mutation test; typed errors.
 
-**M2 — Attestation, consumers, cost report** · 3 weeks · $11,000
-Public and private consumer paths; reference consumers (ERC-20 and native ETH to a
-contract) with the recommended consumer pattern; Hoodi and mainnet fixtures with the same
-contract address (#F5); SPEL IDL; end-to-end tests against a standalone sequencer and Hoodi
-in CI; the full cost report (#P1–#P9) including private proving on a mid-range laptop and
-the minimum spec; audit quotes collected.
+**M2 — Attestation, consumers, cost report** · 3 weeks · $9,000
+Public and private consumer paths on testnet; reference consumers (ERC-20 and native ETH to
+a contract) with the recommended consumer pattern; the same contract address across mainnet
+and a testnet (#F5); SPEL IDL; end-to-end tests against a standalone sequencer and Hoodi in
+CI; the full cost report (#P1–#P9) including private proving on a mid-range laptop and the
+minimum spec; audit quotes collected.
 
-**M3 — Core module, CLI, update daemon** · 3 weeks · $11,000
+**M3 — Core module, CLI, update daemon** · 3 weeks · $9,000
 Logos core module (produce, verify, submit, read configuration, verify checkpoint);
 CLI on top of it with dry runs returning on-chain error codes; update daemon as a Logos
 module plus headless CLI: deferral, check-before-submit, proving hints over Logos
@@ -204,13 +209,21 @@ The audit itself is not in this budget: I will scope it in M2 with a firm that h
 audited this code family (zkSecurity audited r0vm-helios, Zellic SP1 Helios, Veridise
 Telepathy) for Logos to contract directly, as the RFP anticipates.
 
+**Companion proposal.** I am also applying for
+[RFP-022](https://github.com/logos-co/rfp/blob/master/RFPs/RFP-022-wrapped-erc20.md), the
+privacy-preserving bridge that is this attestation primitive's first consumer. RFP-022
+states that combined proposals are preferred, and the two share one verification core: the
+bridge mints only against a statement this primitive produces. Either can be funded alone;
+funded together, M3's core module and daemon serve both, and I would discount the combined
+scope accordingly.
+
 Each milestone stands on its own. If Logos wants to combine work across proposals, M3
 (core module, CLI, daemon) and the private-verifier and private-consumer paths can be
 delivered separately.
 
 ## Total Requested Budget (USD)
 
-$45,000
+$38,000
 
 ## Relevant Experience
 

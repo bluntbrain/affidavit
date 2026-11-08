@@ -17,7 +17,7 @@ path = "src/bin/affidavit_program.rs"
 
 [dependencies]
 # LEZ main at the commit this prototype was written against.
-lee_core = { git = "https://github.com/logos-blockchain/logos-execution-zone", rev = "d7ba18f577184133e256511a14afa2951ca2a2a0" }
+lee_core = { git = "https://github.com/logos-blockchain/logos-execution-zone", tag = "v0.4.0-rc1" }
 affidavit-core = { path = "../../crates/core", default-features = false, features = ["std", "borsh", "blst"] }
 alloy-primitives = { version = "1.4", default-features = false, features = ["borsh"] }
 borsh = { version = "1.5", features = ["derive"] }

@@ -27,7 +27,7 @@ and the LEZ program has 5 more.
 | **Inclusion** | Accounts and storage (`eth_getProof`, MPT via `alloy-trie`), receipts and logs (receipt trie rebuilt and checked against the header root), native ETH transfers (SSZ proof under the payload's `transactions_root` + signature recovery). Real WETH and USDC transfers (2025, Sept 2026) and the deposit contract's balance. |
 | **Statements** | Predicates (`==`, `!=`, `<`, `<=`, `>`, `>=`) supplied by the consumer; chain binding; deterministic identifiers for nullifiers. |
 | **Attacks refused** | Fabricated chain with every Merkle path repaired, 341/512 signatures, attacker committee, tampered roots, missing finality, replays, skipped periods, stale checkpoint, other networks, uncovered predicates: one test each, with a typed error code. |
-| **LEZ program** | Handlers for LEZ `main`'s actor model (`lez/program`): instance at the PDA of its own configuration, permissionless verification by any actor, compare-and-swap apply, write-once header records, public and private consumer paths. Driven through LEZ's `ReceiveInput`/`Response` over all mainnet updates, it ends in the same state as the native client. |
+| **LEZ program** | Handlers for LEZ's actor model, building and passing tests against `lee_core` v0.4.0-rc1 (`lez/program`): instance at the PDA of its own configuration, permissionless verification by any actor, compare-and-swap apply, write-once header records, public and private consumer paths. Driven through LEZ's `ReceiveInput`/`Response` over all mainnet updates, it ends in the same state as the native client. |
 | **Measured cost** | The LEZ program binary itself, built for RISC Zero (upstream nightly + `build-std`, no `rzup`) and executed with LEZ's input framing: `Verify` 14.6M cycles, `Apply` 57K, a consumer attestation 0.6M to 1.3M. Placed privately, an update costs the sequencer about **0.49M gas, 25 to 30× less** than verifying it publicly. A private consumer attestation is proven for real into a 222,668-byte succinct receipt (8.3 min on a 4-vCPU VM). The signers' key is the committee's committed aggregate minus the witnessed non-signers, which took an update from 240M cycles to 13.7M. See [`docs/COSTS.md`](docs/COSTS.md). |
 | **Operators** | Deferral, check-before-submit and proving hints, plus a contention simulation: five operators each pay about 20%, wasted submissions fall 30× on the public path, and wasted proofs fall from 400 to 0 per 100 updates on the private path. See [`docs/OPERATOR.md`](docs/OPERATOR.md). |
 
@@ -67,7 +67,7 @@ crates/core   affidavit-core: light client, SSZ, inclusion, statements (no_std +
 crates/io     Beacon API / JSON-RPC / spec-test decoding, proof builders, follower
 crates/cli    `affidavit` CLI: demo, sync, attest, checkpoint
 crates/sim    operator contention simulation
-lez/program   the LEZ program (actor model on LEZ main, pinned commit)
+lez/program   the LEZ program (actor model, builds+tests on lee_core v0.4.0-rc1)
 zkvm/         RISC Zero measurement guest, and hosts that count cycles for the core and the program
 testdata/     mainnet fixtures and consensus-spec-tests vectors (provenance in testdata/README.md)
 ```

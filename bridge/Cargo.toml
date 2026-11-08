@@ -1,0 +1,20 @@
+[package]
+name = "causeway-mint-demo"
+description = "RFP-022 seam demo: authorise a wrapped-token mint from a verified Affidavit statement"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+publish = false
+
+# Standalone: this is the RFP-022 bridge's inbound-leg demonstration, kept out of the
+# affidavit (RFP-021) workspace so the primitive stays independent of its consumer.
+[workspace]
+
+[dependencies]
+affidavit-core = { path = "../crates/core", default-features = false, features = ["std"] }
+alloy-primitives = { version = "1.4", default-features = false }
+sha2 = "0.10"
+
+[dev-dependencies]
+affidavit-io = { path = "../crates/io" }
+hex = "0.4"

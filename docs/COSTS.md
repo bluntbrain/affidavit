@@ -19,7 +19,7 @@ From LEZ `main` (`lez/programs/fee/core`):
 
 ## The LEZ program, per action
 
-The program binary (`lez/build-program.sh`, LEZ `lee_core` at `d7ba18f`, blst through
+The program binary (`lez/build-program.sh`, LEZ `lee_core` at v0.4.0-rc1, blst through
 RISC Zero's accelerated fork) executed in the RISC Zero executor with LEZ's own input
 framing (`to_borsh_frame` of a `ReceiveInput`):
 

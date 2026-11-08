@@ -17,7 +17,7 @@ affidavit-core = { path = "../../crates/core", features = ["borsh"] }
 affidavit-io = { path = "../../crates/io" }
 affidavit-zkvm-jobs = { path = "../jobs" }
 affidavit-lez = { path = "../../lez/program" }
-lee_core = { git = "https://github.com/logos-blockchain/logos-execution-zone", rev = "d7ba18f577184133e256511a14afa2951ca2a2a0" }
+lee_core = { git = "https://github.com/logos-blockchain/logos-execution-zone", tag = "v0.4.0-rc1" }
 alloy-primitives = "1.4"
 alloy-consensus = "2"
 alloy-eips = "2"
