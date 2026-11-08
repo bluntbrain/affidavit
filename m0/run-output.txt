@@ -1,0 +1,12 @@
+# M0: affidavit_program through LEZ v0.4 V03State (lee_core v0.4.0-rc1)
+
+[1] Initialize (public): instance PDA 8RxKiN63tw3o3V9ZxjwhnUe3Wjb6Y32Fmz84oEvBYDFh created, finalized slot 7069376, period 862
+    PASS
+
+[2] Verify -> Apply (public): updates_applied 1, next committee learned true
+    Apply accepted: the instance's from_own_program() authorization held.
+    PASS
+
+[3] Verify -> Apply (PRIVATE): proving the private transition...
+    Private Apply landed: updates_applied 1, next committee learned true
+    PASS: a privately-proven Verify advanced the PUBLIC instance.
