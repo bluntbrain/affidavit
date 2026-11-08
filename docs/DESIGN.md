@@ -113,8 +113,8 @@ land it, from the same program code:
   cycles) and `Record` (19,600). One transaction per update, about 0.49M gas in all,
   instead of 12M to 15M over at least two transactions in two blocks. It needs no
   BLS12-381 precompile, because BLS never runs on the sequencer. The cost moves to the
-  submitter's prover: 15.9M padded cycles, minutes on a GPU and about 20 to 40 minutes on
-  a recent laptop CPU (estimates from a measured proof; M0 measures both). Tracking is periodic
+  submitter's prover: 15.9M padded cycles into one 222,668-byte succinct receipt (measured:
+  77 minutes on a 4-vCPU VM with no GPU; minutes on a GPU; M0 measures GPU and laptop). Tracking is periodic
   and latency-tolerant, so this is where the RFP's own reasoning puts it.
   The open question for M0 is concrete: on testnet 0.4, can a submitter place an actor
   of a public program privately with an empty (fresh) actor state, and does a

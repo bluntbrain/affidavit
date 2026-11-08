@@ -62,8 +62,9 @@ shows all of it in one run. The LEZ program is written for the actor model of LE
 testnet-0.4 line and **builds and passes its tests against `lee_core` at v0.4.0-rc1**;
 driven through LEZ's own message types across all the mainnet updates, it ends in exactly
 the state the native light client reaches. Its binary is measured action by action in the
-RISC Zero executor, and a private consumer attestation is proven for real into a
-222,668-byte succinct receipt that verifies against the program's image id.
+RISC Zero executor, and both private actions are proven for real: the whole update proves
+in 77 minutes on a 4-vCPU VM into a 222,668-byte succinct receipt that verifies against the
+program's image id — one transaction, one ~224 KB receipt the sequencer checks.
 
 Two design choices matter most for LEZ in particular. First, verification is separated
 from application, so the 15M-cycle update check can run in a privately placed actor whose
@@ -105,8 +106,8 @@ above LEZ's 10M per-transaction cap. LEZ runs private actors uncapped and proven
 sender, with the sequencer verifying one receipt at a fixed 409,764 gas. So the preferred
 path places `Verify` privately: one transaction, about 0.49M gas including `Apply` (57K
 cycles) and the header record (20K), 25 to 30 times less than verifying publicly. The
-submitter proves 15.9M padded cycles: minutes on a GPU or through a proving service, and
-about 20 to 40 minutes on a recent laptop CPU (extrapolated from a measured proof). The
+submitter proves 15.9M padded cycles into one 222,668-byte succinct receipt (measured: 77
+minutes on a 4-vCPU VM with no GPU; minutes on a GPU or a proving service). The
 fallback, if testnet 0.4 does not allow that placement, splits the public verification
 along the pairing's seams. M0 settles this on testnet first, and both paths are measured,
 since the comparison is the input to any precompile RFP (#P8).

@@ -60,28 +60,31 @@ the public one, and fits one transaction in one block.
 
 ## Proving time
 
-Measured: the program's `AttestPrivate` action, proven with RISC Zero 3.0.5's CPU prover
-into a succinct receipt and verified against the program's image id, on a 4-vCPU cloud VM
-(Xeon, 2.8 GHz, 15 GB RAM, no GPU; [raw](raw/prove-lez-program-2026-10-16.txt)):
+Measured: the program's private actions, proven with RISC Zero 3.0.5's CPU prover into a
+succinct receipt and verified against the program's image id, on a 4-vCPU cloud VM
+(Xeon, 2.8 GHz, 15 GB RAM, no GPU; [raw](raw/prove-lez-program-2026-11-08.txt)):
 
 ```console
-cd zkvm/host && PROVE_ONLY=AttestPrivate CARGO_TARGET_DIR=target-prove cargo run --release --features prove --bin measure_lez
+cd zkvm/host && CARGO_TARGET_DIR=target-prove cargo run --release --features prove --bin measure_lez
 ```
 
 | Proof | Segments | Time | Receipt | Peak memory |
 |---|---:|---:|---:|---:|
-| `AttestPrivate`, native ETH transfer (a private consumer's proof) | 1 (2^20 cycles) | **495 s** | succinct, **222,668 bytes** | 9.4 GB |
+| **`Verify`, update with committee handoff** (the operator's private update) | 16 (2^20 each) | **4,647 s (77 min)** | succinct, **222,668 bytes** | 9.4 GB |
+| `AttestPrivate`, native ETH transfer (a private consumer's proof) | 1 (2^20) | **495 s** | succinct, **222,668 bytes** | 9.4 GB |
 
-The receipt matches the roughly 224 KB of proof LEZ charges storage gas for. The rest is
-derived from that measurement and from LEZ's own `cycle_bench` (about 73 µs per padded
-cycle on an Apple M2 Pro CPU before recursion, and 18 to 25 s for the privacy-preserving
-composition); M0 measures it on target hardware:
+Both receipts are the same **222,668 bytes** — a succinct receipt is a fixed size whatever
+the work behind it — and match the roughly 224 KB of proof LEZ charges storage gas for. So
+the whole 15.9M-cycle update lands in one private transaction carrying one 224 KB receipt,
+proved in 77 minutes on four CPU cores with no GPU. On a GPU or a proving service this is
+minutes; the figures below scale the two measured points by core count and LEZ's own
+`cycle_bench` (about 73 µs per padded cycle on an Apple M2 Pro CPU before recursion):
 
 | What | Padded cycles | 4-vCPU VM | Recent laptop CPU | GPU |
 |---|---:|---:|---:|---|
+| Update with handoff, private verifier | 15.9M (16 segments) | **77 min, *measured*** | about 20 to 40 min, *estimate* | 1.5 to 2.5 min, *assumed* |
+| Finality update, private verifier | 13.6M (14 segments) | about 68 min, *from the measured rate* | about 17 to 35 min, *estimate* | same |
 | Private consumer attestation | 1.05M (1 segment) | 8.3 min, *measured* | about 2 to 3 min, *estimate* | seconds, *assumed* |
-| Update with handoff, private verifier | 15.9M (16 segments) | about 2.5 h, *extrapolated* | about 20 to 40 min, *estimate* | 1.5 to 2.5 min, *assumed* |
-| Finality update, private verifier | 13.6M (14 segments) | about 2 h, *extrapolated* | about 17 to 35 min, *estimate* | same |
 
 So an operator on the private path needs a GPU, a fast desktop or a proving service
 (proving is trustless to outsource) to keep an hourly cadence; any machine with 16 GB of

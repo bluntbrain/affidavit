@@ -1,0 +1,11 @@
+Real proofs of the LEZ program binary's private actions (RISC Zero 3.0.5, CPU prover, ProverOpts::succinct).
+Machine: 4 vCPU cloud VM (Intel(R) Xeon(R) Processor @ 2.80GHz), 15 GB RAM, no GPU.
+Each proof is verified against the program's image id (compute_image_id) before the line prints.
+Command: cd zkvm/host && CARGO_TARGET_DIR=target-prove cargo run --release --features prove --bin measure_lez
+         (PROVE_ONLY=<substring> restricts which private actions are proven.)
+
+PROOF | Verify (update with handoff) | 4647 s | 16 segments | succinct seal 222668 bytes | 4 threads | peak 9403 MB
+PROOF | AttestPrivate (native ETH transfer) | 495 s | 1 segment | succinct seal 222668 bytes | 4 threads | peak 9379 MB
+
+Both succinct receipts are 222,668 bytes (a succinct receipt is a fixed size), matching the ~224 KB
+of proof LEZ charges storage gas for. The 16-segment update proves in 77 minutes on four CPU cores.
