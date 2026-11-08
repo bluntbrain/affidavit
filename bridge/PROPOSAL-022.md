@@ -29,6 +29,7 @@ ishan.lakhwani@gmail.com · Telegram @bluntbrainsol
 - Social links: [github.com/bluntbrain](https://github.com/bluntbrain) · [bluntbrain.com](https://bluntbrain.com) · [linkedin.com/in/ishanl](https://linkedin.com/in/ishanl) · [x.com/bluntbrain](https://x.com/bluntbrain)
 - Role: everything in this proposal — the Ethereum vault, the LEZ bridge and wrapped-token programs, the privacy construction, the Logos core and UI modules, the CLI and relayer, and the cost and privacy test suites. The Ethereum state attestation this bridge consumes is my RFP-021 submission (Affidavit).
 - Status: full-time for the RFP-022 engagement. This is a tier-L, 16–20 week project and I am scoping it as my primary work for that window.
+- One accountable engineer across the Ethereum vault, the LEZ programs and the modules: no cross-team hand-offs on a security-critical bridge, and the same person who built the Affidavit core it depends on.
 
 The independent smart-contract audit (Security #1) is scoped during the grant with a firm
 that audits both Solidity and RISC Zero code, for Logos to contract directly (see

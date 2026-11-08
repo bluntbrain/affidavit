@@ -27,6 +27,7 @@ ishan.lakhwani@gmail.com · Telegram @bluntbrainsol
 - Social links: [github.com/bluntbrain](https://github.com/bluntbrain) · [bluntbrain.com](https://bluntbrain.com) · [linkedin.com/in/ishanl](https://linkedin.com/in/ishanl) · [x.com/bluntbrain](https://x.com/bluntbrain)
 - Role: everything in this proposal: light client and LEZ program, inclusion proofs and statements, core module, update daemon, CLI, cost measurement, docs
 - Status: full-time for the whole grant
+- One accountable engineer who already built and shipped the prototype: a lower total cost to Logos than a multi-person team, with no coordination overhead and a single owner across the light client, the modules and the daemon.
 
 The independent audit (Supportability #8) is done by a third-party firm, scoped and quoted
 during the grant so Logos can contract it directly (see Milestones).
@@ -177,20 +178,20 @@ path on 0.4; whether LEZ can verify an arbitrary RISC Zero receipt (composition)
 reproducible program build with its image id checked in CI; reuse assessment finished with
 those numbers; design freeze.
 
-**M1 — Light client on testnet 0.4** · 3 weeks · $8,000
+**M1 — Light client on testnet 0.4** · 3 weeks · $7,000
 Program deployed to the public LEZ testnet (0.4): initialise, verify, apply, header
 records, accumulator; live instances for Hoodi, Sepolia (Gloas) and mainnet; permissionless
 advancing from unknown accounts; the whole adversarial suite run against the sequencer, with
 an on-chain verification script and a mutation test; typed errors.
 
-**M2 — Attestation, consumers, cost report** · 3 weeks · $8,000
+**M2 — Attestation, consumers, cost report** · 3 weeks · $7,000
 Public and private consumer paths on testnet; reference consumers (ERC-20 and native ETH to
 a contract) with the recommended consumer pattern; the same contract address across mainnet
 and a testnet (#F5); SPEL IDL; end-to-end tests against a standalone sequencer and Hoodi in
 CI; the full cost report (#P1–#P9) including private proving on a mid-range laptop and the
 minimum spec; audit quotes collected.
 
-**M3 — Core module, CLI, update daemon** · 3 weeks · $8,000
+**M3 — Core module, CLI, update daemon** · 3 weeks · $7,000
 Logos core module (produce, verify, submit, read configuration, verify checkpoint);
 CLI on top of it with dry runs returning on-chain error codes; update daemon as a Logos
 module plus headless CLI: deferral, check-before-submit, proving hints over Logos
@@ -223,7 +224,7 @@ delivered separately.
 
 ## Total Requested Budget (USD)
 
-$33,000
+$30,000
 
 ## Relevant Experience
 
