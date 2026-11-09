@@ -1,0 +1,11 @@
+LEZ checkout: v0.4.0-rc1 (1806e873)
+sequencer_service: sequencer_service 0.1.0
+wallet: wallet 0.1.0
+rustc: rustc 1.97.0 (2d8144b78 2026-07-07)
+cargo: cargo 1.97.0 (c980f4866 2026-06-30)
+risc0-zkvm: version = "3.0.5"
+risc0-zkos-v1compat: version = "2.2.2"
+logos-blockchain-circuits (prebuilt artifact): v0.5.7 linux-x86_64 via LBC_ROOT_DIR
+affidavit_program ELF: 23852d6ba69f074139d2019ae68ca76669566a90e334bb6fc5371cefe992e032 (907108 bytes), built by lez/build-program.sh against lee_core v0.4.0-rc1
+sequencer features: standalone (mock Bedrock) + prove (in-process guest execution); network config lez/sequencer/service/networks/local.json (block_create_timeout 15s)
+machine: 4 vCPU, 15 GB RAM

@@ -1,0 +1,4 @@
+Run 1 (default wallet gas_limit 2,000,000): Initialize tx e55ce2c5be7a025d1cdca9af2265532a16c604f0549d6380f8822210150819c9 included in block 39 with no effect (instance PDA stayed Uninitialized).
+Dry run with gas_limit 40,000,000: metered cycles 2,543,172, wire bytes 26,454, base fees exec 8 / stor 8, fee at head 20,557,008, action: applies.
+Send with gas_limit 40,000,000: rejected by the sequencer: 'Incorrect fee: gas_limit 40000000 above max 10000000' (fee_core::market::MAX_GAS_EXEC).
+Run 2 (gas_limit 10,000,000): everything landed; see result.json.

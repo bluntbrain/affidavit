@@ -123,6 +123,12 @@ in-process executor, the attestations 2–10 s.
 
 ## Runbook: the end-to-end confirmation (on a machine with network access)
 
+> **Done for steps 1–5 (locally, dev-mode proofs): see [`live/`](live/README.md)** — the program
+> deployed through `program_loader` to a running standalone v0.4.0-rc1 sequencer, `Initialize`,
+> all seven updates as privately-proven `Verify` → public `Apply` + `Record`, `AttestRecord`
+> with a reverted refusal, and `AttestPrivate` → `CheckRoot`, every step a settled transaction.
+> A real-proof run is reported there as it completes. Step 6 (public testnet) remains open.
+
 This is the full version of steps 3–6, for the user's own machine, where the Logos circuit
 host and the public testnet are reachable:
 

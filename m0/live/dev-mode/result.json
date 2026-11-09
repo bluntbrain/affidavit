@@ -1,0 +1,118 @@
+{
+  "instance_pda": "5kkzHnNwGPAdUeqF2j4AW2QvtZao7FQetPqLwpD1KruM",
+  "lee_core": "v0.4.0-rc1",
+  "program_account": "3VBG9ZC9xXVg3jcKzu1N29bjd4HvSafFTZrSizFLWvmn",
+  "risc0_dev_mode": true,
+  "sequencer": "http://127.0.0.1:3040/",
+  "steps": [
+    {
+      "program_account": "3VBG9ZC9xXVg3jcKzu1N29bjd4HvSafFTZrSizFLWvmn",
+      "reused": true,
+      "step": "deploy"
+    },
+    {
+      "block": 80,
+      "finalized_slot": 7069376,
+      "instance_pda": "5kkzHnNwGPAdUeqF2j4AW2QvtZao7FQetPqLwpD1KruM",
+      "secs": 12.006956100463867,
+      "step": "initialize",
+      "tx": "e988189bfcd400e3646ab72b6a1a210bd678ebe9691bb1df6a43d9bf9d072d54"
+    },
+    {
+      "block": 81,
+      "kind": "committee handoff",
+      "secs": 13.577784538269043,
+      "step": "verify_private_0",
+      "tx": "81d956ea913369adfa029f357ca3a460201e77303904a85fcfff54baca70e9fa",
+      "updates_applied": 1
+    },
+    {
+      "block": 82,
+      "eth_block": 17883995,
+      "finalized_slot": 7070047,
+      "kind": "committee handoff",
+      "record_pda": "34QNsokBvgbFGWr5yZSssZ1kDtkkUPj7wkdQshwYjhaS",
+      "secs": 13.4878511428833,
+      "step": "verify_private_1",
+      "tx": "8ea39b1809154f6202b7eac0fbaf0b1f3eb98b97b9cb4846cad081a44fc7a9a1",
+      "updates_applied": 2
+    },
+    {
+      "block": 83,
+      "eth_block": 17892141,
+      "finalized_slot": 7078240,
+      "kind": "committee handoff",
+      "record_pda": "F9PxdtpvGACHucKrpfBYgFKBt1qaLZFUtSV3Jzt7Nm3y",
+      "secs": 13.583338737487793,
+      "step": "verify_private_2",
+      "tx": "4c662a6c5848a601941df5f187773c270e90c4dfec8e2606e5294b1198e7287c",
+      "updates_applied": 3
+    },
+    {
+      "block": 84,
+      "eth_block": 17903093,
+      "finalized_slot": 7089280,
+      "kind": "committee handoff",
+      "record_pda": "CU3BdVgUmsyGdMAw5eC76SmSyaC6AUw6TMnyrcZEmyo2",
+      "secs": 13.554055213928223,
+      "step": "verify_private_3",
+      "tx": "0f704da73c8c886f7effea52ffedc577d4becbf97c999bd8e6808c50255cc418",
+      "updates_applied": 4
+    },
+    {
+      "block": 85,
+      "eth_block": 17908060,
+      "finalized_slot": 7094272,
+      "kind": "committee handoff",
+      "record_pda": "82b3GNNWZWCHyrsskWd7BpuwajXpvDeBtubMTpPkH2RV",
+      "secs": 13.529367446899414,
+      "step": "verify_private_4",
+      "tx": "e48706e2529a4a9bc17a5a9ee8c4ac71c39459d772f42d50c5f05214343aafc0",
+      "updates_applied": 5
+    },
+    {
+      "block": 86,
+      "eth_block": 17917816,
+      "finalized_slot": 7104096,
+      "kind": "committee handoff",
+      "record_pda": "8ag3c5kkofJzK2EjhKHynjsNahoqrKTDtS4JvWuzov9T",
+      "secs": 25.79482078552246,
+      "step": "verify_private_5",
+      "tx": "f8dacda353aa9f9ab0408f0d74d41b72eafc7ef96154c5d66f568596b35922c3",
+      "updates_applied": 6
+    },
+    {
+      "block": 87,
+      "eth_block": 17923026,
+      "finalized_slot": 7109344,
+      "kind": "finality update",
+      "record_pda": "AMbZV9ZQb2rXCWpFNSkrhkZzjVXL6jdyNEVqrKMQ4yjx",
+      "secs": 13.557721138000488,
+      "step": "verify_private_6",
+      "tx": "9b50566a53c1f07a4cb80b6f9dd73572ab46d7c0a5514ffad93906fe36415089",
+      "updates_applied": 7
+    },
+    {
+      "block": 88,
+      "record_slot": 7109344,
+      "secs": 12.006586074829102,
+      "statement_id": "0xeda294015d67e08ecc3bfa5b56bc8de46eccca6402b89b34ed1916ed94fe987c",
+      "step": "attest_record_public",
+      "tx": "826075bd6072b7ca3624417e299af5dacfdd38fe68df093e791eda8c9ca72c46"
+    },
+    {
+      "outcome": "submitted",
+      "step": "attest_record_refusal",
+      "tx": "1a73914d9d9b1124fea0b3a458fdf585f88a93b99e496553059b2912798d3bc8"
+    },
+    {
+      "block": 90,
+      "root": "0xcc69d515fe4613d1350c9313bcd2e8a7e09e95fde02b800ed74c6be278cde958",
+      "secs": 12.43344497680664,
+      "step": "attest_private",
+      "tx": "94401516f1bb70bbc0baad992feb8b4e5cc6546e54de550e01a5b4d771c9ad1d"
+    }
+  ],
+  "total_secs": 155.67422485351562,
+  "updates_run": 7
+}

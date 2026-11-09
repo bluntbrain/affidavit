@@ -1,0 +1,27 @@
+[package]
+name = "affidavit_live"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+lee = { path = "../lee/state_machine", features = ["prove"] }
+lee_core = { path = "../lee/state_machine/core" }
+wallet = { path = "../lez/wallet" }
+program_deployment = { path = "../examples/program_deployment" }
+sequencer_service_rpc = { path = "../lez/sequencer/service/rpc", features = ["client"] }
+common = { path = "../lez/common" }
+affidavit-core = { path = "/home/user/affidavit/crates/core", features = ["borsh"] }
+affidavit-io = { path = "/home/user/affidavit/crates/io" }
+affidavit-lez = { path = "/home/user/affidavit/lez/program" }
+alloy-primitives = "1.4"
+borsh = "1.5"
+anyhow = "1"
+hex = "0.4"
+serde_json = "1"
+log = "0.4"
+env_logger = "0.11"
+tokio = { version = "1.50", features = ["macros", "rt-multi-thread"] }
+risc0-binfmt = "=3.0.4"
+risc0-zkos-v1compat = "=2.2.2"
+risc0-zkvm = { version = "=3.0.5", features = ["prove"] }

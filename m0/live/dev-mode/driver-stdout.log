@@ -1,0 +1,54 @@
+# Affidavit live run: sequencer http://127.0.0.1:3040/ (tip block 79), lee_core v0.4.0-rc1, RISC0_DEV_MODE=true
+
+Latest block is 79
+Syncing to block 79. Blocks to sync: 4
+Synced to block 79 in 7.446674ms
+[0] reusing program account 3VBG9ZC9xXVg3jcKzu1N29bjd4HvSafFTZrSizFLWvmn deployed by an earlier run
+
+[1] Initialize (public): tx e988189bfcd400e3646ab72b6a1a210bd678ebe9691bb1df6a43d9bf9d072d54 in block 80: instance PDA 5kkzHnNwGPAdUeqF2j4AW2QvtZao7FQetPqLwpD1KruM, finalized slot 7069376, period 862 (12.0 s)
+    PASS
+
+[2] 7 update(s) as private Verify -> public Apply (+ Record), proven client-side, settled by the sequencer
+Latest block is 81
+Syncing to block 81. Blocks to sync: 2
+Synced to block 81 in 5.18999ms
+    update 0 (committee handoff): tx 81d956ea913369adfa029f357ca3a460201e77303904a85fcfff54baca70e9fa in block 81: Apply landed, committees only, updates_applied 1 (13.6 s)
+Latest block is 82
+Syncing to block 82. Blocks to sync: 1
+Synced to block 82 in 3.440623ms
+    update 1 (committee handoff): tx 8ea39b1809154f6202b7eac0fbaf0b1f3eb98b97b9cb4846cad081a44fc7a9a1 in block 82: Apply + Record landed, finalized slot 7070047 (block 17883995), record PDA 34QNsokBvgbFGWr5yZSssZ1kDtkkUPj7wkdQshwYjhaS, updates_applied 2 (13.5 s)
+Latest block is 83
+Syncing to block 83. Blocks to sync: 1
+Synced to block 83 in 3.003149ms
+    update 2 (committee handoff): tx 4c662a6c5848a601941df5f187773c270e90c4dfec8e2606e5294b1198e7287c in block 83: Apply + Record landed, finalized slot 7078240 (block 17892141), record PDA F9PxdtpvGACHucKrpfBYgFKBt1qaLZFUtSV3Jzt7Nm3y, updates_applied 3 (13.6 s)
+Latest block is 84
+Syncing to block 84. Blocks to sync: 1
+Synced to block 84 in 5.083218ms
+    update 3 (committee handoff): tx 0f704da73c8c886f7effea52ffedc577d4becbf97c999bd8e6808c50255cc418 in block 84: Apply + Record landed, finalized slot 7089280 (block 17903093), record PDA CU3BdVgUmsyGdMAw5eC76SmSyaC6AUw6TMnyrcZEmyo2, updates_applied 4 (13.6 s)
+Latest block is 85
+Syncing to block 85. Blocks to sync: 1
+Synced to block 85 in 9.975662ms
+    update 4 (committee handoff): tx e48706e2529a4a9bc17a5a9ee8c4ac71c39459d772f42d50c5f05214343aafc0 in block 85: Apply + Record landed, finalized slot 7094272 (block 17908060), record PDA 82b3GNNWZWCHyrsskWd7BpuwajXpvDeBtubMTpPkH2RV, updates_applied 5 (13.5 s)
+Latest block is 86
+Syncing to block 86. Blocks to sync: 1
+Synced to block 86 in 3.307789ms
+    update 5 (committee handoff): tx f8dacda353aa9f9ab0408f0d74d41b72eafc7ef96154c5d66f568596b35922c3 in block 86: Apply + Record landed, finalized slot 7104096 (block 17917816), record PDA 8ag3c5kkofJzK2EjhKHynjsNahoqrKTDtS4JvWuzov9T, updates_applied 6 (25.8 s)
+Latest block is 87
+Syncing to block 87. Blocks to sync: 1
+Synced to block 87 in 3.573445ms
+    update 6 (finality update): tx 9b50566a53c1f07a4cb80b6f9dd73572ab46d7c0a5514ffad93906fe36415089 in block 87: Apply + Record landed, finalized slot 7109344 (block 17923026), record PDA AMbZV9ZQb2rXCWpFNSkrhkZzjVXL6jdyNEVqrKMQ4yjx, updates_applied 7 (13.6 s)
+    on-chain instance == the native follower: finalized slot 7109344 (block 17923026), 7 updates applied, 7 header records, accumulator root 0xcc69d515fe4613d1350c9313bcd2e8a7e09e95fde02b800ed74c6be278cde958
+    PASS
+
+[3] AttestRecord (public): tx 826075bd6072b7ca3624417e299af5dacfdd38fe68df093e791eda8c9ca72c46 in block 88: accepted at header record slot 7109344 (block 17923026), 167 transactions in the block (12.0 s)
+    statement id 0xeda294015d67e08ecc3bfa5b56bc8de46eccca6402b89b34ed1916ed94fe987c: tx 0xfb6bdc7b92c0b3a03c1d8ade8147a09722da0dfa3393c98d5f8406da782cd08d from 0x1869D73051EB5f7D87B93401eE3B918bC357E125 to 0x41292153E7F5e78C3b7382D59E742b92461CBC70 value 479602910000000000 wei
+    refusal (value > 2^256-1): submitted as 1a73914d9d9b1124fea0b3a458fdf585f88a93b99e496553059b2912798d3bc8 -> Ok(89) (see the sequencer log for the AFF-301 failure)
+    PASS
+
+Latest block is 90
+Syncing to block 90. Blocks to sync: 3
+Synced to block 90 in 7.308496ms
+[4] AttestPrivate -> CheckRoot (PRIVATE): tx 94401516f1bb70bbc0baad992feb8b4e5cc6546e54de550e01a5b4d771c9ad1d in block 90: accepted; the public crossing disclosed only accumulator root 0xcc69d515fe4613d1350c9313bcd2e8a7e09e95fde02b800ed74c6be278cde958; instance state unchanged (12.4 s)
+    PASS
+
+total wall-clock 156 s

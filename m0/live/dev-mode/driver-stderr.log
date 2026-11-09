@@ -1,0 +1,89 @@
+[2026-11-09T13:51:59Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
+[2026-11-09T13:51:59Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
+[2026-11-09T13:51:59Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
+[2026-11-09T13:51:59Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
+[2026-11-09T13:51:59Z INFO  wallet::poller] Starting poll for transaction e988189bfcd400e3646ab72b6a1a210bd678ebe9691bb1df6a43d9bf9d072d54
+[2026-11-09T13:51:59Z INFO  wallet::poller] Poll 1
+[2026-11-09T13:52:11Z INFO  wallet::poller] Poll 2
+[2026-11-09T13:52:11Z INFO  wallet] Claiming 1 pending credit(s) before the root: [(22, Some(3169135))]
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+[2026-11-09T13:52:13Z INFO  wallet::poller] Starting poll for transaction 81d956ea913369adfa029f357ca3a460201e77303904a85fcfff54baca70e9fa
+[2026-11-09T13:52:13Z INFO  wallet::poller] Poll 1
+[2026-11-09T13:52:25Z INFO  wallet::poller] Poll 2
+[2026-11-09T13:52:25Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
+[2026-11-09T13:52:25Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
+[2026-11-09T13:52:25Z INFO  wallet] Claiming 1 pending credit(s) before the root: [(30, Some(3348195))]
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+[2026-11-09T13:52:26Z INFO  wallet::poller] Starting poll for transaction 8ea39b1809154f6202b7eac0fbaf0b1f3eb98b97b9cb4846cad081a44fc7a9a1
+[2026-11-09T13:52:26Z INFO  wallet::poller] Poll 1
+[2026-11-09T13:52:38Z INFO  wallet::poller] Poll 2
+[2026-11-09T13:52:38Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
+[2026-11-09T13:52:38Z INFO  wallet] Claiming 1 pending credit(s) before the root: [(38, Some(3543615))]
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+[2026-11-09T13:52:40Z INFO  wallet::poller] Starting poll for transaction 4c662a6c5848a601941df5f187773c270e90c4dfec8e2606e5294b1198e7287c
+[2026-11-09T13:52:40Z INFO  wallet::poller] Poll 1
+[2026-11-09T13:52:52Z INFO  wallet::poller] Poll 2
+[2026-11-09T13:52:52Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
+[2026-11-09T13:52:52Z INFO  wallet] Claiming 1 pending credit(s) before the root: [(46, Some(3544535))]
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+[2026-11-09T13:52:53Z INFO  wallet::poller] Starting poll for transaction 0f704da73c8c886f7effea52ffedc577d4becbf97c999bd8e6808c50255cc418
+[2026-11-09T13:52:53Z INFO  wallet::poller] Poll 1
+[2026-11-09T13:53:05Z INFO  wallet::poller] Poll 2
+[2026-11-09T13:53:05Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
+[2026-11-09T13:53:05Z INFO  wallet] Claiming 1 pending credit(s) before the root: [(54, Some(3558400))]
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+[2026-11-09T13:53:07Z INFO  wallet::poller] Starting poll for transaction e48706e2529a4a9bc17a5a9ee8c4ac71c39459d772f42d50c5f05214343aafc0
+[2026-11-09T13:53:07Z INFO  wallet::poller] Poll 1
+[2026-11-09T13:53:19Z INFO  wallet::poller] Poll 2
+[2026-11-09T13:53:19Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
+[2026-11-09T13:53:19Z INFO  wallet] Claiming 1 pending credit(s) before the root: [(62, Some(3550035))]
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+[2026-11-09T13:53:21Z INFO  wallet::poller] Starting poll for transaction f8dacda353aa9f9ab0408f0d74d41b72eafc7ef96154c5d66f568596b35922c3
+[2026-11-09T13:53:21Z INFO  wallet::poller] Poll 1
+[2026-11-09T13:53:33Z INFO  wallet::poller] Poll 2
+[2026-11-09T13:53:45Z INFO  wallet::poller] Poll 3
+[2026-11-09T13:53:45Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
+[2026-11-09T13:53:45Z INFO  wallet] Claiming 1 pending credit(s) before the root: [(70, Some(3559685))]
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+[2026-11-09T13:53:46Z INFO  wallet::poller] Starting poll for transaction 9b50566a53c1f07a4cb80b6f9dd73572ab46d7c0a5514ffad93906fe36415089
+[2026-11-09T13:53:46Z INFO  wallet::poller] Poll 1
+[2026-11-09T13:53:58Z INFO  wallet::poller] Poll 2
+[2026-11-09T13:53:58Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
+[2026-11-09T13:53:58Z INFO  wallet::poller] Starting poll for transaction 826075bd6072b7ca3624417e299af5dacfdd38fe68df093e791eda8c9ca72c46
+[2026-11-09T13:53:58Z INFO  wallet::poller] Poll 1
+[2026-11-09T13:54:10Z INFO  wallet::poller] Poll 2
+[2026-11-09T13:54:10Z INFO  wallet::poller] Starting poll for transaction 1a73914d9d9b1124fea0b3a458fdf585f88a93b99e496553059b2912798d3bc8
+[2026-11-09T13:54:10Z INFO  wallet::poller] Poll 1
+[2026-11-09T13:54:22Z INFO  wallet::poller] Poll 2
+[2026-11-09T13:54:22Z INFO  wallet] Claiming 1 pending credit(s) before the root: [(78, Some(3561065))]
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+WARNING: proving in dev mode. This will not generate valid, secure proofs.
+WARNING: Proving in dev mode does not generate a valid receipt. Receipts generated from this process are invalid and should never be used in production.
+[2026-11-09T13:54:23Z INFO  wallet::poller] Starting poll for transaction 94401516f1bb70bbc0baad992feb8b4e5cc6546e54de550e01a5b4d771c9ad1d
+[2026-11-09T13:54:23Z INFO  wallet::poller] Poll 1
+[2026-11-09T13:54:35Z INFO  wallet::poller] Poll 2
+[2026-11-09T13:54:35Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
+[2026-11-09T13:54:35Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
+[2026-11-09T13:54:35Z INFO  wallet] Stored persistent accounts at /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/wallet_home/storage.json
