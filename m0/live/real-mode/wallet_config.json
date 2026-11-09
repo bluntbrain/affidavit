@@ -1,0 +1,11 @@
+{
+  "sequencer": {
+    "sequencer_addr": "http://127.0.0.1:3040/"
+  },
+  "seq_poll_timeout": "12s",
+  "seq_tx_poll_max_blocks": 5,
+  "seq_poll_max_retries": 5,
+  "seq_block_poll_max_amount": 100,
+  "gas_limit": 10000000,
+  "private_fee_headroom_blocks": 5
+}

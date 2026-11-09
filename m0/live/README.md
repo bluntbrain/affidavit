@@ -8,9 +8,9 @@ sequencer accepted into a block and settled.
 
 What it is: the standalone sequencer of LEZ `v0.4.0-rc1` (commit `1806e873`), built with its
 `standalone` feature (Bedrock mocked) and `prove` feature (in-process guest execution), on
-the repository's `networks/local.json` genesis (15-second blocks). What it is not: a public
-testnet, and (in the run below) not real proofs. Both are separate claims; see
-[*What this does and does not show*](#what-this-does-and-does-not-show).
+the repository's `networks/local.json` genesis (15-second blocks). Two runs: the **whole chain with dev-mode proofs**, and **real proofs** (the sequencer verifying
+real receipts) for the funding transfer, `Initialize` and one private `Verify`. What it is
+not: a public testnet. See [*What this does and does not show*](#what-this-does-and-does-not-show).
 
 ## Result (dev-mode proofs, `dev-mode/`)
 
@@ -60,23 +60,43 @@ privately-proven update settled in the next block, ≈13.5 s end to end).
   real wallet: PDA admission by seed, the private→public `from_own_program()` crossing, fee
   declarations and payers, write-once header records, both consumer paths, and a refused
   consumer transaction reverted by the sequencer and reflected in the block.
-- **Dev-mode proofs.** Sequencer and wallet ran with `RISC0_DEV_MODE=1`, so the receipts
-  the sequencer verified were dev-mode placeholders. Everything else is real. The
-  cryptographic proof is covered separately: the 77-minute real proof of `Verify` in
-  [`../../docs/COSTS.md`](../../docs/COSTS.md), and the real-proof live run below once it
-  completes.
+- **Dev-mode proofs in the full-chain run.** There, sequencer and wallet ran with
+  `RISC0_DEV_MODE=1`, so the receipts the sequencer verified were placeholders; everything
+  else was real. The real-proof run removes that caveat for the funding transfer,
+  `Initialize` and update 0, with the sequencer verifying real receipts.
 - **Standalone, not consensus.** Bedrock is the mocked actor of the `standalone` feature:
   no proof-of-leadership, data availability or gossip peers. Those sit below the execution
   layer and do not change how a transaction is executed or how state is mutated.
 - **Local, not the public testnet.** Nothing here is a public-testnet claim.
 
-## Real-proof run (`real-mode/`, in progress)
+## Result (real proofs, `real-mode/`)
 
-Same pipeline with `RISC0_DEV_MODE` unset on both sides: the sequencer verifies real
-receipts; the wallet proves for real. The funding transfer, `Initialize` and one private
-`Verify` (update 0) are run; a real `Verify` proof took 77 minutes on this 4-vCPU machine
-in the standalone measurement, plus the privacy-preserving circuit's own proof. Results are
-added to `real-mode/` when the run completes.
+Same pipeline on a fresh sequencer with `RISC0_DEV_MODE` **unset on both sides**: the
+sequencer verifies real receipts (its log carries no dev-mode line), the wallet proves for
+real. Program account **`4mLuS85wQVXr5CniXpioaWeTEaMjNuWx19U7TWUP5F9S`**, instance PDA
+**`FDpgXb7UX49JjcZrpxQpNbnUEVo91W5RhLwRAMSySNR1`**.
+
+| step | tx | block | proof | time |
+|---|---|---|---|---|
+| funding transfer to the private fee payer (privacy-preserving) | `ae89c64b…a79be9` | 70 | real | ≈17 min to prove and land |
+| deploy (10 segments + header, public) | `0ef4f102…` … `f9372860…` | 71–81 | — | 156 s |
+| `Initialize` (public) | `726ad58c…c74d93` | 82 | — | 24 s |
+| **update 0, private `Verify` → public `Apply`** | **`0a1f4b68…f7f9e2`** | **559** | **real** | **7,156 s (119 min) from proving start to inclusion** |
+
+Peak resident memory observed during the `Verify` proof: ≈8.5 GB; CPU time ≈7.5 hours over
+the 2-hour wall-clock on 4 vCPUs. The standalone proof of the same `Verify` was 77 minutes
+([`../../docs/COSTS.md`](../../docs/COSTS.md)); the difference is the privacy-preserving
+circuit's own proof over the program receipt, which the wallet adds so the sequencer can
+verify the transaction. On a GPU prover both shrink to minutes; the sequencer-side
+verification is the same regardless.
+
+This is the headline claim with the placeholder removed: **a really-proven private `Verify`,
+submitted over RPC, verified by a running LEZ v0.4.0-rc1 sequencer, advanced the public
+instance** (`updates_applied` 0 → 1). Only update 0 was run this way; the other six updates
+and both consumer paths are in the dev-mode run above. Evidence: [`real-mode/result.json`](real-mode/result.json),
+[`real-mode/driver-stdout.log`](real-mode/driver-stdout.log),
+[`real-mode/sequencer-filtered.log`](real-mode/sequencer-filtered.log),
+[`real-mode/pipeline-summary.txt`](real-mode/pipeline-summary.txt).
 
 ## Reproduce
 

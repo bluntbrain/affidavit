@@ -1,0 +1,40 @@
+[2026-11-09T13:57:54Z] sequencer (real verification) up
+Transaction hash is ae89c64b124b526f3dacf631adc95d7b746a8d4fb7eb522726b79ef8e5a79be9
+Transaction is included in block 70
+Balance 49994929384, nonce 330858655437812363586329618820176131997
+gas_limit -> 10000000
+[2026-11-09T14:15:17Z] wallet ready; starting the driver (real proofs, 1 update)
+Transaction hash is 0ef4f102a112c7df08f2ed2202184636755660e5e79d3171d5dfe3bc212dd8f2
+Transaction is included in block 71
+Transaction data is Public(PublicTransaction { message: TransactionMessage { public_context: PublicExecutionContext { actors: {Actor { account_id: GjnUL9q62PHuxyfTWQ7BqhnGWFFZV4imHj5kw45WVLfq, program
+Transaction hash is f5afbe1131a43f0be929a7ee7ce5cc18e3fb16cfbab1fa1f0032c81fe40f220a
+Transaction is included in block 72
+Transaction data is Public(PublicTransaction { message: TransactionMessage { public_context: PublicExecutionContext { actors: {Actor { account_id: 52ybgrCBmEng6xKxFAJG4AvUsVHbHrouj5kr8mWnDkCE, program
+Transaction hash is c092da1fe53cd14387e16daed473a7307391293c006fea1125f29b8633cfdfc9
+Transaction is included in block 73
+Transaction data is Public(PublicTransaction { message: TransactionMessage { public_context: PublicExecutionContext { actors: {Actor { account_id: E4aRXzdTqgc9XcSPmKCMMv4hL5HqZiPGaWM82jnAFZ7q, program
+Transaction hash is 067ae7d74c6d43083042873ffeaa6fb4470cd22b7996e09e140671c58c94ad39
+Transaction is included in block 74
+Transaction data is Public(PublicTransaction { message: TransactionMessage { public_context: PublicExecutionContext { actors: {Actor { account_id: D4smEpNA19UnaDN5CKGFzibQKAr3aHwtuN31oi41rFLh, program
+Transaction hash is 3e3dd2325297fb711fe6f17354db7c62f09ffe7407fb02433d8ef5ffaf2451c0
+Transaction is included in block 75
+Transaction data is Public(PublicTransaction { message: TransactionMessage { public_context: PublicExecutionContext { actors: {Actor { account_id: DwWoWqVkL4qPDsp1LVf65SLZ6YfJGeNf4XqTvYQwxfFY, program
+Transaction hash is 828a8c20b9cdf0db875e5c0a2d892a42a03d32c29a7f220fe59143aa67608302
+Transaction is included in block 76
+Transaction data is Public(PublicTransaction { message: TransactionMessage { public_context: PublicExecutionContext { actors: {Actor { account_id: GKXjnqx8QRaTmYCRCNHisGdFiYJNjpzffKJYKX2BjHKd, program
+Transaction hash is 5ce2cae0d881601fa10dffcd433513523c3d790e15be16555ba80b60dc62716a
+Transaction is included in block 77
+Transaction data is Public(PublicTransaction { message: TransactionMessage { public_context: PublicExecutionContext { actors: {Actor { account_id: 8GULcFjLRnsisdGdqEnxJ6ghnfsZHbCrDwYcQz8iqX8w, program
+Transaction hash is b9e45e785f48636c31dfcdc672be1924a24d57f022c652687932d975dc47e9d3
+Transaction is included in block 78
+Transaction data is Public(PublicTransaction { message: TransactionMessage { public_context: PublicExecutionContext { actors: {Actor { account_id: 4qLKuYQ5wUqp58bts5h3HyxoVXYQ1wd3Y6hgzHHWa7Wb, program
+Transaction hash is 6edc2b4e136a08801c4ae61c0722f96359fb12ffedffeefb52314b977c2586d8
+Transaction is included in block 79
+Transaction data is Public(PublicTransaction { message: TransactionMessage { public_context: PublicExecutionContext { actors: {Actor { account_id: DkFPqTjXEQ7Yv2RofcxbABtgsiHCJXYezJH736chCBYp, program
+Transaction hash is 6573a87d995ba6b1999041449d87267dcd205e66a808dfdd45cf1add2baf1bbb
+Transaction is included in block 80
+Transaction data is Public(PublicTransaction { message: TransactionMessage { public_context: PublicExecutionContext { actors: {Actor { account_id: 3BDUCdfP5jDQnLMXvURyFNHZajyTAafPncSt9hrgK9UG, program
+Transaction hash is f937286080bc18bea76d4c1b084414209e823ce7f225dc0f81c33cdd7a415fbd
+Transaction is included in block 81
+Transaction data is Public(PublicTransaction { message: TransactionMessage { public_context: PublicExecutionContext { actors: {Actor { account_id: 4mLuS85wQVXr5CniXpioaWeTEaMjNuWx19U7TWUP5F9S, program
+[2026-11-09T16:17:33Z] real-proof run finished

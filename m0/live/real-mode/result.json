@@ -1,0 +1,34 @@
+{
+  "instance_pda": "FDpgXb7UX49JjcZrpxQpNbnUEVo91W5RhLwRAMSySNR1",
+  "lee_core": "v0.4.0-rc1",
+  "program_account": "4mLuS85wQVXr5CniXpioaWeTEaMjNuWx19U7TWUP5F9S",
+  "risc0_dev_mode": false,
+  "sequencer": "http://127.0.0.1:3040/",
+  "steps": [
+    {
+      "elf_bytes": 907108,
+      "program_account": "4mLuS85wQVXr5CniXpioaWeTEaMjNuWx19U7TWUP5F9S",
+      "secs": 156.2456512451172,
+      "step": "deploy",
+      "wrapped_bytes": 939532
+    },
+    {
+      "block": 82,
+      "finalized_slot": 7069376,
+      "instance_pda": "FDpgXb7UX49JjcZrpxQpNbnUEVo91W5RhLwRAMSySNR1",
+      "secs": 24.017168045043945,
+      "step": "initialize",
+      "tx": "726ad58cc082382d8c73b38691c3f1316c24dc60b51a2f791d6f77d07cc74d93"
+    },
+    {
+      "block": 559,
+      "kind": "committee handoff",
+      "secs": 7155.8876953125,
+      "step": "verify_private_0",
+      "tx": "0a1f4b68a80f061c6c4aae0d5b9974d1cdf1c4265cb8f91add1d56e554f7f9e2",
+      "updates_applied": 1
+    }
+  ],
+  "total_secs": 7336.28369140625,
+  "updates_run": 1
+}

@@ -158,11 +158,12 @@ verification exposed through the core module.
    native client's accumulator root), and both consumer paths, public `AttestRecord` and
    private `AttestPrivate → CheckRoot`, accept and refuse as specified — **and the same chain
    runs on a standalone v0.4.0-rc1 sequencer** ([`m0/live/`](https://github.com/bluntbrain/affidavit/tree/main/m0/live)):
-   deployed through `program_loader`, every step a settled transaction, dev-mode proofs. That
-   run also showed the sequencer's 10M-gas per-transaction cap: a public `Verify` (14.6M
-   cycles) cannot be one transaction there, the private path's public part (≈80K) can. M0
-   confirms it with real proofs and on the public testnet, with a measured public-split
-   fallback if any detail there differs.
+   deployed through `program_loader`, every step a settled transaction (whole chain with
+   dev-mode proofs; **`Initialize` and one private `Verify` with real proofs, verified by a
+   sequencer running without dev mode**). That run also showed the sequencer's 10M-gas
+   per-transaction cap: a public `Verify` (14.6M cycles) cannot be one transaction there,
+   the private path's public part (≈80K) can. M0 confirms it on the public testnet, with a
+   measured public-split fallback if any detail there differs.
 2. *Forks.* Sepolia moved to Gloas on 2026-10-06; Gloas headers commit only to the
    execution block hash, so roots come from the RLP header checked against it (first piece
    already in the core). Hoodi (Fulu) is the first testnet target; the Gloas program version

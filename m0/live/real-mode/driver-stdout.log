@@ -1,0 +1,40 @@
+# Affidavit live run: sequencer http://127.0.0.1:3040/ (tip block 70), lee_core v0.4.0-rc1, RISC0_DEV_MODE=false
+
+Latest block is 70
+Transaction hash is 0ef4f102a112c7df08f2ed2202184636755660e5e79d3171d5dfe3bc212dd8f2
+Transaction is included in block 71
+Transaction hash is f5afbe1131a43f0be929a7ee7ce5cc18e3fb16cfbab1fa1f0032c81fe40f220a
+Transaction is included in block 72
+Transaction hash is c092da1fe53cd14387e16daed473a7307391293c006fea1125f29b8633cfdfc9
+Transaction is included in block 73
+Transaction hash is 067ae7d74c6d43083042873ffeaa6fb4470cd22b7996e09e140671c58c94ad39
+Transaction is included in block 74
+Transaction hash is 3e3dd2325297fb711fe6f17354db7c62f09ffe7407fb02433d8ef5ffaf2451c0
+Transaction is included in block 75
+Transaction hash is 828a8c20b9cdf0db875e5c0a2d892a42a03d32c29a7f220fe59143aa67608302
+Transaction is included in block 76
+Transaction hash is 5ce2cae0d881601fa10dffcd433513523c3d790e15be16555ba80b60dc62716a
+Transaction is included in block 77
+Transaction hash is b9e45e785f48636c31dfcdc672be1924a24d57f022c652687932d975dc47e9d3
+Transaction is included in block 78
+Transaction hash is 6edc2b4e136a08801c4ae61c0722f96359fb12ffedffeefb52314b977c2586d8
+Transaction is included in block 79
+Transaction hash is 6573a87d995ba6b1999041449d87267dcd205e66a808dfdd45cf1add2baf1bbb
+Transaction is included in block 80
+Transaction hash is f937286080bc18bea76d4c1b084414209e823ce7f225dc0f81c33cdd7a415fbd
+Transaction is included in block 81
+[0] deployed affidavit_program (907108 bytes ELF, 939532 bytes wrapped) as program account 4mLuS85wQVXr5CniXpioaWeTEaMjNuWx19U7TWUP5F9S (156.2 s)
+
+[1] Initialize (public): tx 726ad58cc082382d8c73b38691c3f1316c24dc60b51a2f791d6f77d07cc74d93 in block 82: instance PDA FDpgXb7UX49JjcZrpxQpNbnUEVo91W5RhLwRAMSySNR1, finalized slot 7069376, period 862 (24.0 s)
+    PASS
+
+[2] 1 update(s) as private Verify -> public Apply (+ Record), proven client-side, settled by the sequencer
+Latest block is 559
+Syncing to block 559. Blocks to sync: 489
+Synced to block 559 in 433.502495ms
+    update 0 (committee handoff): tx 0a1f4b68a80f061c6c4aae0d5b9974d1cdf1c4265cb8f91add1d56e554f7f9e2 in block 559: Apply landed, committees only, updates_applied 1 (7155.9 s)
+    on-chain instance tracks the native follower: finalized slot 7069376 (block 17883333), 1 updates applied, 1 header records, accumulator root 0xa72679440bcf01c56972ad69ec1101a6d0af8a5d8d7e4fcfe5630afb58eb5ac7
+    PASS
+
+(LIVE_UPDATES=1: attestations need the full chain; skipped)
+total wall-clock 7336 s

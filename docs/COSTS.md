@@ -72,6 +72,8 @@ cd zkvm/host && CARGO_TARGET_DIR=target-prove cargo run --release --features pro
 |---|---:|---:|---:|---:|
 | **`Verify`, update with committee handoff** (the operator's private update) | 16 (2^20 each) | **4,647 s (77 min)** | succinct, **222,668 bytes** | 9.4 GB |
 | `AttestPrivate`, native ETH transfer (a private consumer's proof) | 1 (2^20) | **495 s** | succinct, **222,668 bytes** | 9.4 GB |
+| **`Verify` with handoff as a complete privacy-preserving transaction** — program proof plus the privacy-preserving circuit's proof, built by LEZ's wallet and **verified by a running v0.4.0-rc1 sequencer** ([`m0/live/real-mode`](../m0/live/real-mode)) | 16 + circuit | **7,156 s (119 min)** from proving start to inclusion | as submitted | ≈8.5 GB observed |
+| Privacy-preserving circuit alone: a native-token transfer, built by the wallet, verified by the same sequencer | circuit | ≈17 min | as submitted | ≈6 GB observed |
 
 Both receipts are the same **222,668 bytes** — a succinct receipt is a fixed size whatever
 the work behind it — and match the roughly 224 KB of proof LEZ charges storage gas for. So

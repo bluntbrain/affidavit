@@ -1,13 +1,11 @@
-**Update: the same chain now runs on a live LEZ v0.4.0-rc1 sequencer**
+**Update: the same chain now runs on a live LEZ v0.4.0-rc1 sequencer — including one really-proven private `Verify`**
 
-After the state-machine test, I ran the real `affidavit_program` against a **running standalone LEZ `v0.4.0-rc1` sequencer** (mock Bedrock, in-process execution), deployed through `program_loader` and driven entirely with LEZ's own wallet library. Every step is a transaction the sequencer accepted and settled ([`m0/live/`](https://github.com/bluntbrain/affidavit/tree/main/m0/live), full hashes in `dev-mode/result.json`):
+After the state-machine test, I ran the real `affidavit_program` against a **running standalone LEZ `v0.4.0-rc1` sequencer** (mock Bedrock, in-process execution), deployed through `program_loader` and driven entirely with LEZ's own wallet library. Every step is a transaction the sequencer accepted and settled ([`m0/live/`](https://github.com/bluntbrain/affidavit/tree/main/m0/live)).
 
-- program account `3VBG9ZC9xXVg3jcKzu1N29bjd4HvSafFTZrSizFLWvmn`, instance PDA `5kkzHnNwGPAdUeqF2j4AW2QvtZao7FQetPqLwpD1KruM`
-- `Initialize` (public) — block 80
-- all seven mainnet updates as **privately-proven `Verify` → public `Apply` (+ `Record`)**, blocks 81–87, one update per block; on-chain instance == native follower, 7 header records, accumulator root `0xcc69d515…cde958`
-- `AttestRecord` (public consumer path) — block 88; a predicate that cannot hold — block 89, **reverted by the sequencer** (`AFF-301`), record unchanged
-- `AttestPrivate → CheckRoot` (private consumer path) — block 90, only the accumulator root crossed, instance bytes unchanged
+**Whole chain, dev-mode proofs** (`dev-mode/result.json`): program `3VBG9ZC9…FLWvmn`, instance PDA `5kkzHnNw…1KruM`; `Initialize` (block 80); all seven mainnet updates as **privately-proven `Verify` → public `Apply` (+ `Record`)**, blocks 81–87, one per block, on-chain instance == native follower, 7 header records; `AttestRecord` (88) and a predicate that cannot hold **reverted by the sequencer** (89, `AFF-301`); `AttestPrivate → CheckRoot` (90), only the accumulator root crossed.
+
+**Real proofs, sequencer verifying real receipts** (`real-mode/result.json`): fresh sequencer without dev mode; program `4mLuS85w…P5F9S`, instance PDA `FDpgXb7U…ySNR1`; a really-proven privacy-preserving funding transfer (block 70, ≈17 min), `Initialize` (block 82), and **update 0 as a really-proven private `Verify` whose `Apply` advanced the public instance — block 559, 119 minutes to prove on 4 vCPUs** (the 77-minute program proof plus the privacy-preserving circuit's proof; minutes on a GPU).
 
 Two things the live sequencer taught that the state machine couldn't: the wallet's default `gas_limit` (2M) is below `Initialize`'s metered 2,543,172 cycles (the first attempt was included with no effect), and the sequencer caps a transaction at **10M gas** — so a *public* `Verify` (14.6M cycles) cannot be a single transaction on this configuration, while the private path's public part (`Apply`+`Record`, ≈80K) is. That is the one-transaction design's reason to exist, measured.
 
-Caveats, deliberately kept: this run used `RISC0_DEV_MODE=1` on both sides (placeholder receipts; execution, delivery, authorization, fees and state are real); it is the standalone sequencer, not the public testnet. A real-proof run on the same setup is in progress and will be reported in the same directory; the public-testnet run stays a separate claim.
+Caveats, kept deliberately: this is the standalone sequencer (mock Bedrock), not the public testnet; the full chain and the consumer paths were run with dev-mode receipts, the real-proof run covers `Initialize` and one update. The public-testnet run stays a separate claim.

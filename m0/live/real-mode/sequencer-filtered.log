@@ -1,0 +1,38 @@
+[2026-11-09T13:57:52Z INFO  sequencer_service] Config: {"home":"/tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/seq-real","max_num_tx_in_block":20,"mempool_max_size":1000,"block_create_timeout":"15s","retry_pending_blocks_timeout":"5s","bedrock_config":{"channel_id":"0101010101010101010101010101010101010101010101010101010101010101","node_url":"http://localhost:18080/","auth":null,"priority_fee_percent":12,"stale_refund_slots":300},"genesis":{"channel_params":{"minimum_sequencer_stake":149,"posting_timeframe":300,"posting_timeout":25,"exit_delay":100,"max_block_size":1048576},"actions":[{"supply_account":{"recipient":{"identified":{"key":"6aa4c365699b89d963ef85a59868b9612b6001f90750b4970662a62776332e81"}},"balance":10000000000000}},{"supply_account":{"recipient":{"identified":{"key":"891ae258f92ca8447af6cf09c41d96b3a06187d098b91ab2cc17b42e3c4a2fa1"}},"balance":20000000000000}},{"supply_private_account":{"address":"44KVvzvh2ephQU9aR5snboGUXKgS1FnPYh1W4KZKwmhm","balance":10000000000000}},{"supply_private_account":{"address":"478hD6LXFTYu5gRRkWkCyXPRsWgCwAfRredoCUfxr5b9","balance":20000000000000}}]},"cross_zone":null,"metrics_listen_address":"0.0.0.0:9000","gossip":{"listen_addr":"/ip4/0.0.0.0/udp/0/quic-v1","bootstrap_peers":[]}}, channel signing key file: /tmp/claude-0/-home-user/4c23a3cc-7448-58d4-8106-87348b64bb41/scratchpad/live/seq-real/channel_signing_key, funding public key: "2e03b2eff5a45478e7e79668d2a146cf2c5c7925bce927f2b1c67f2ab4fc0d26"
+[2026-11-09T13:57:52Z INFO  sequencer_service] Storage Actor spawned
+[2026-11-09T13:57:52Z INFO  sequencer_service] Bedrock Broker Actor spawned
+[2026-11-09T13:57:52Z INFO  sequencer_service] Bedrock Actor spawned
+[2026-11-09T13:57:52Z INFO  sequencer_core] Channel signing public key: 39f307fb98d7ee6d5143bcd176052693a77e176a421c0a71324a072fe69c83b4
+[2026-11-09T13:57:52Z INFO  sequencer_core] Channel does not exist yet; starting it as channel creator
+[2026-11-09T13:57:52Z INFO  sequencer_core] Genesis fingerprint: 28b3b7c36e661ebab9d6eb245c6bb7265925a4277bdb4f543e08e6c7151fc68b
+[2026-11-09T13:57:52Z INFO  sequencer_core] Producer reward account (stake ownership): 2WFyxWaRzrLfL3CkgmfksSR31AdcSotG583ALKvHhmWV
+[2026-11-09T13:57:52Z INFO  sequencer_core] Genesis fingerprint: 28b3b7c36e661ebab9d6eb245c6bb7265925a4277bdb4f543e08e6c7151fc68b
+[2026-11-09T13:57:52Z INFO  sequencer_core] No stored channel view; starting on the final tier
+[2026-11-09T13:57:52Z INFO  sequencer_service] Executor Actor spawned
+[2026-11-09T13:57:52Z INFO  libp2p_swarm] local_peer_id=12D3KooWDiaLzpy4mATF8GTrVhyVufd1LPoZGRH49kg64qf62wns
+[2026-11-09T13:57:52Z INFO  sequencer_gossip_actor::actor] Gossip listening on [/ip4/127.0.0.1/udp/51564/quic-v1] as 12D3KooWDiaLzpy4mATF8GTrVhyVufd1LPoZGRH49kg64qf62wns
+[2026-11-09T13:57:52Z INFO  sequencer_service] Gossip network started as 12D3KooWDiaLzpy4mATF8GTrVhyVufd1LPoZGRH49kg64qf62wns
+[2026-11-09T13:57:52Z INFO  sequencer_service] Gossip Actor spawned
+[2026-11-09T13:57:52Z INFO  sequencer_rpc_server_actor::actor] Starting RPC Server on 127.0.0.1:3040
+[2026-11-09T13:57:52Z INFO  sequencer_service] RPC Server Actor spawned
+[2026-11-09T13:57:52Z INFO  sequencer_service] Block production scheduler started
+[2026-11-09T13:57:54Z INFO  jsonrpsee_server::server] connection; remote_addr=127.0.0.1:36958 conn_id=0
+[2026-11-09T13:57:54Z INFO  jsonrpsee_server::server] connection; remote_addr=127.0.0.1:36964 conn_id=1
+[2026-11-09T14:15:05Z INFO  jsonrpsee_server::server] connection; remote_addr=127.0.0.1:37104 conn_id=2
+[2026-11-09T14:15:07Z INFO  sequencer_core] Created block with 3 transactions in 0 seconds
+[2026-11-09T14:15:17Z INFO  jsonrpsee_server::server] connection; remote_addr=127.0.0.1:60930 conn_id=3
+[2026-11-09T14:15:17Z INFO  jsonrpsee_server::server] connection; remote_addr=127.0.0.1:60942 conn_id=4
+[2026-11-09T14:15:22Z INFO  sequencer_core] Created block with 3 transactions in 0 seconds
+[2026-11-09T14:15:37Z INFO  sequencer_core] Created block with 3 transactions in 0 seconds
+[2026-11-09T14:15:52Z INFO  sequencer_core] Created block with 3 transactions in 0 seconds
+[2026-11-09T14:16:07Z INFO  sequencer_core] Created block with 3 transactions in 0 seconds
+[2026-11-09T14:16:22Z INFO  sequencer_core] Created block with 3 transactions in 0 seconds
+[2026-11-09T14:16:37Z INFO  sequencer_core] Created block with 3 transactions in 0 seconds
+[2026-11-09T14:16:52Z INFO  sequencer_core] Created block with 3 transactions in 0 seconds
+[2026-11-09T14:17:07Z INFO  sequencer_core] Created block with 3 transactions in 0 seconds
+[2026-11-09T14:17:22Z INFO  sequencer_core] Created block with 3 transactions in 0 seconds
+[2026-11-09T14:17:37Z INFO  sequencer_core] Created block with 3 transactions in 0 seconds
+[2026-11-09T14:17:52Z INFO  sequencer_core] Created block with 3 transactions in 0 seconds
+[2026-11-09T14:18:07Z INFO  sequencer_core] Created block with 3 transactions in 0 seconds
+[2026-11-09T16:17:21Z INFO  jsonrpsee_server::server] connection; remote_addr=127.0.0.1:57362 conn_id=5
+[2026-11-09T16:17:22Z INFO  sequencer_core] Created block with 3 transactions in 0 seconds
