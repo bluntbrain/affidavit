@@ -152,11 +152,13 @@ verification exposed through the core module.
 
 **Anticipated challenges.**
 1. *LEZ 0.4 semantics for private placement*: **already validated at the execution-state-
-   machine level** ([`m0/`](https://github.com/bluntbrain/affidavit/tree/main/m0)) — a
-   privately-proven `Verify` advances the public instance through LEZ v0.4.0-rc1's real
-   `V03State`, the `from_own_program()` authorization holding across the private→public
-   boundary. M0 confirms it end to end on a running sequencer and the public testnet, with a
-   measured public-split fallback if any detail there differs.
+   machine level** ([`m0/`](https://github.com/bluntbrain/affidavit/tree/main/m0)) — every
+   mainnet update runs as a privately-proven `Verify` that advances the public instance
+   through LEZ v0.4.0-rc1's real `V03State` (seven updates, seven header records, the
+   native client's accumulator root), and both consumer paths, public `AttestRecord` and
+   private `AttestPrivate → CheckRoot`, accept and refuse as specified. M0 confirms it end
+   to end on a running sequencer and the public testnet, with a measured public-split
+   fallback if any detail there differs.
 2. *Forks.* Sepolia moved to Gloas on 2026-10-06; Gloas headers commit only to the
    execution block hash, so roots come from the RLP header checked against it (first piece
    already in the core). Hoodi (Fulu) is the first testnet target; the Gloas program version

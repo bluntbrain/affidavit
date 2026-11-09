@@ -8,5 +8,27 @@
     PASS
 
 [3] Verify -> Apply (PRIVATE): proving the private transition...
-    Private Apply landed: updates_applied 1, next committee learned true
+    Private Apply landed: updates_applied 1, next committee learned true (24.9 s)
     PASS: a privately-proven Verify advanced the PUBLIC instance.
+
+[4] The whole fixture chain, privately: updates 1..6 as private Verify -> public Apply (+ Record)
+    update 1 (committee handoff): Apply + Record landed: finalized slot 7070047 (block 17883995), record PDA 6ZptXq6ZBGZacC4KJq9yazNsEz9XHcxr2UQyWLZ5L8rw, updates_applied 2 (27.1 s)
+    update 2 (committee handoff): Apply + Record landed: finalized slot 7078240 (block 17892141), record PDA 8B9RkHvdZhuXpR5rLjp38jfBFeGQfERWQjPd4GyZ6rTy, updates_applied 3 (27.6 s)
+    update 3 (committee handoff): Apply + Record landed: finalized slot 7089280 (block 17903093), record PDA Fmwt4NLs6jPYP4oSCTajMEbgeAQPFKqPyYH1SsYETnyf, updates_applied 4 (27.2 s)
+    update 4 (committee handoff): Apply + Record landed: finalized slot 7094272 (block 17908060), record PDA FTLWBEHePmUt6sEn9PsWS1RKqcXTmjS8oG1B4VYyh3sW, updates_applied 5 (26.2 s)
+    update 5 (committee handoff): Apply + Record landed: finalized slot 7104096 (block 17917816), record PDA CpuFLr9BxYcfLFQYBGfizLzbVDjc5N9wBpcqnfpWvGEC, updates_applied 6 (27.2 s)
+    update 6 (finality update): Apply + Record landed: finalized slot 7109344 (block 17923026), record PDA 8MqeiDvVX5ueeStJ3RbYQQuegCBTYB3zCEmEZ83RVqdm, updates_applied 7 (26.2 s)
+    on-chain instance == native follower: finalized slot 7109344 (block 17923026), 7 updates applied, 7 header records, accumulator root 0xcc69d515fe4613d1350c9313bcd2e8a7e09e95fde02b800ed74c6be278cde958
+    PASS
+
+[5] AttestRecord (public): accepted at header record slot 7109344 (block 17923026), 167 transactions in the block (2.1 s)
+    statement id 0xeda294015d67e08ecc3bfa5b56bc8de46eccca6402b89b34ed1916ed94fe987c: tx 0xfb6bdc7b92c0b3a03c1d8ade8147a09722da0dfa3393c98d5f8406da782cd08d from 0x1869D73051EB5f7D87B93401eE3B918bC357E125 to 0x41292153E7F5e78C3b7382D59E742b92461CBC70 value 479602910000000000 wei
+    refused as expected with AFF-301: the same evidence under a predicate it does not satisfy (value > 2^256-1)
+    refused as expected with AFF-101: a Sepolia consumer at a mainnet record
+    PASS
+
+[6] AttestPrivate -> CheckRoot (PRIVATE): accepted; the public crossing disclosed only accumulator root 0xcc69d515fe4613d1350c9313bcd2e8a7e09e95fde02b800ed74c6be278cde958; instance state unchanged (9.7 s)
+    refused as expected with AFF-210: an attestation under an accumulator root the instance never produced
+    PASS
+
+total wall-clock 226 s
