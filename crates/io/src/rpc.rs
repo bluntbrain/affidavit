@@ -147,6 +147,12 @@ pub fn ordered_trie_proof(values: &[Vec<u8>], target: Option<u64>) -> (B256, Vec
 }
 
 /// Receipt proof for transaction `tx_index`, checked against `receipts_root`.
+/// The receipts root a header carries for exactly these receipts, in order.
+pub fn receipts_root(receipts: &[ReceiptEnvelope]) -> B256 {
+    let encoded: Vec<Vec<u8>> = receipts.iter().map(|r| r.encoded_2718()).collect();
+    ordered_trie_proof(&encoded, None).0
+}
+
 pub fn receipt_proof(receipts: &[ReceiptEnvelope], receipts_root: &B256, tx_index: u64) -> Result<ReceiptProof> {
     let encoded: Vec<Vec<u8>> = receipts.iter().map(|r| r.encoded_2718()).collect();
     let (root, proof) = ordered_trie_proof(&encoded, Some(tx_index));

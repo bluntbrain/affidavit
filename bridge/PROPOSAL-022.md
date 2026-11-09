@@ -67,11 +67,18 @@ I have built the attestation core and the seam already:
 **[github.com/bluntbrain/affidavit](https://github.com/bluntbrain/affidavit)** is the
 RFP-021 primitive — a full Ethereum light client inside a LEZ program, proven on mainnet
 data and the official consensus-spec-tests, building on `lee_core` v0.4.0-rc1 — and
-`bridge/` in that repo is a runnable demonstration of the inbound mint authorisation:
-it takes an Affidavit statement about an ERC-20 `Transfer` into the vault, checks the
-registry, denomination and finality predicate, derives the one-time deposit nullifier, and
-authorises the wrapped mint, refusing a replay, a wrong amount, a wrong token and an
-unfinalised deposit. The bridge proper is the grant.
+`bridge/` in that repo already runs three pieces of this bridge. The **Ethereum vault**:
+deposits of ETH, ERC-20 and USDT-style tokens on a fixed denomination grid, immutable
+pairing, independent admin and freezer, rolling caps, and `release` on a proven burn with
+pairing, finality, replay, proof, freeze, cap and supply checks — 21 tests on an in-process
+EVM, gas measured. The **inbound mint authorisation**: Affidavit's real receipt-proof path
+attests a `Deposit` log the compiled vault emitted, the depositor's seed-derived secret
+opens the commitment, and a one-time nullifier derived from secret and deposit authorises
+the mint; someone else's deposit, a replay, a wrong vault, denomination, instance or
+network, and a plain ERC-20 transfer are refused. **Recovery from the seed alone**, in Rust
+and JavaScript with a shared pinned vector, scanning real vault logs. The design documents
+(architecture, outbound leg, privacy, recovery, costs, combined plan) are in `bridge/docs`.
+The LEZ bridge program, the burn proof and anchor, and the Logos modules are the grant.
 
 ## Technical Approach
 
@@ -87,8 +94,8 @@ off-chain; SPEL for the IDL.
 **Inbound — deposit to mint (the private path).**
 1. A user deposits amount *N* of a registered token to the vault. *N* is one of the token's
    fixed denominations (Privacy #1 baseline). The deposit's only secret is a commitment
-   `c = H(s)` where `s = KDF(seed, token, nonce)` is derived from the user's own wallet
-   seed — so the deposit names no LEZ destination (#F2), and the user can rediscover every
+   `c = H(s)` where `s = H(seed, chain, vault, token, nonce)` is derived from the user's own
+   wallet seed and the deployment's coordinates — so the deposit names no LEZ destination (#F2), and the user can rediscover every
    unclaimed deposit by scanning vault events and recomputing `c` from their seed, with no
    server index and no separately stored secret (#F9).
 2. Affidavit attests the deposit: the vault's `Deposit` log (or the ERC-20 `Transfer` to
@@ -97,10 +104,10 @@ off-chain; SPEL for the IDL.
    time, as a **private** LEZ execution. The proof establishes, in zero knowledge: the
    Affidavit statement is valid against the instance's shared accumulator root (one
    `CheckRoot`, the only public crossing); the deposit is to this configuration's vault, of
-   a registered token, for denomination *N*; and the one-time nullifier `H(s)` has not been
-   spent. The public transaction shows a nullifier, *N*, and the token — never the deposit
-   or the destination (#Privacy 1, 3). The nullifier keyed on the statement enforces
-   one-mint-per-deposit (#Reliability 3), and because the destination is bound inside the
+   a registered token, for denomination *N*; and the one-time nullifier `H(s, id)`, derived from the
+   secret and the deposit's identifier, has not been spent. The public transaction shows a nullifier, *N*, and the token — never the deposit
+   or the destination (#Privacy 1, 3). The nullifier keyed on the secret and the statement
+   enforces one-mint-per-deposit (#Reliability 3) without being computable by an observer, and because the destination is bound inside the
    proof, a relayer who submits the receipt cannot redirect or overcharge (#Security 3).
 
 This is exactly LEZ's `wrapped_token::MintFrom` authorised by a delivery — but the delivery
@@ -139,8 +146,10 @@ failsafe is not a backdoor.
 
 **Anticipated challenges.**
 1. *The LEZ→Ethereum burn proof.* Verifying a LEZ receipt on Ethereum is the heaviest new
-   piece. M0 settles the proof system (RISC Zero → Groth16 via the LEZ proving stack) and
-   measures on-chain verification gas before the design freezes.
+   piece. The vault's release path is built and measured (160k gas before the verifier's own
+   cost); M0 settles the proof system (RISC Zero → Groth16 via the LEZ proving stack) and
+   the settled-state anchor route (`bridge/docs/OUTBOUND.md`), and measures the real
+   verifier gas before the design freezes.
 2. *Fixed denominations vs. fees.* A protocol fee must not re-fingerprint the amount
    (#F13). I handle fees as separate fixed-denomination flows or value-conserving deductions
    that keep the public amount on the denomination grid; M2 measures the anonymity-set cost.
@@ -148,7 +157,9 @@ failsafe is not a backdoor.
    risk documented (#F12, Design Rationale).
 4. *Position recovery completeness.* Every unclaimed deposit and unreleased burn must be
    rediscoverable from the seed alone (#F9, #Reliability 5); the recovery scanner is a
-   first-class deliverable with its own tests, not an afterthought.
+   first-class deliverable; the derivation and the gap-limited scan already exist in Rust
+   and JavaScript with a shared vector and run against real vault logs
+   (`bridge/docs/RECOVERY.md`).
 
 ## Milestones, Payout and Timeline
 
@@ -160,12 +171,13 @@ funded; M0 pins the exact interface between them.
 **M0 — Design, threat model, proof-system baseline** · 2 weeks · $7,000
 The full architecture and threat model; the Ethereum→LEZ and LEZ→Ethereum proof interfaces
 pinned against Affidavit and the LEZ proving stack; on-chain burn-proof verification gas
-measured; the privacy model written as testable anonymity-set claims; the inbound
-mint-authorisation demo (already prototyped) extended to the chosen commitment scheme;
+measured; the privacy model written as testable anonymity-set claims; the vault, mint
+authorisation and recovery code already in the repository brought under the frozen design;
 design freeze.
 
 **M1 — Ethereum vault + inbound mint on testnet 0.4** · 4 weeks · $16,000
-The vault (deposit, registry hooks, native ETH + USDT-style no-boolean tokens, #F1, #F17);
+The vault hardened from the current contract (deposit, registry, caps, freeze, native ETH +
+USDT-style tokens, #F1, #F17);
 the LEZ bridge + wrapped-token programs; the private inbound mint against a live Affidavit
 instance; one-mint-per-deposit and the destination binding under adversarial retry
 (#Reliability 1–3, #Security 2–3). Deployed to a public Ethereum testnet and LEZ testnet 0.4.
@@ -201,7 +213,7 @@ $68,000
 
 ## Relevant Experience
 
-- **The attestation core and the seam, already built:** [github.com/bluntbrain/affidavit](https://github.com/bluntbrain/affidavit) — the RFP-021 primitive on mainnet data and the official spec vectors, building on `lee_core` v0.4.0-rc1, plus `bridge/`, the runnable inbound mint-authorisation demo this proposal rests on.
+- **The attestation core and the seam, already built:** [github.com/bluntbrain/affidavit](https://github.com/bluntbrain/affidavit) — the RFP-021 primitive on mainnet data and the official spec vectors, building on `lee_core` v0.4.0-rc1, plus `bridge/`: the Causeway vault with 21 tests and measured gas, the inbound mint authorisation on real vault receipts, seed-only recovery in two languages, and the design documents this proposal rests on.
 - **Infrastructure Lead at Spout Finance** (tokenised real-world assets, 2026–): own the cloud and release path (Terraform, AWS, Fargate, RDS, Kubernetes, CI/CD) for infrastructure that moves real money.
 - **Solidity and smart-contract security:** an [exogenously collateralised stablecoin with liquidations](https://github.com/bluntbrain/stable-coin-foundry) and [invariant/fuzz testing](https://github.com/bluntbrain/invariant-testing-foundry) in Foundry — directly the escrow-vault, cap and invariant work this RFP needs.
 - **ZK and privacy:** ETH Bangkok win ($2,000) for a ZK credit score proving creditworthiness without revealing balances — anonymity-set reasoning is the core skill RFP-022 asks for.

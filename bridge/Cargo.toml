@@ -16,5 +16,6 @@ alloy-primitives = { version = "1.4", default-features = false }
 sha2 = "0.10"
 
 [dev-dependencies]
+serde_json = "1"
 affidavit-io = { path = "../crates/io" }
 hex = "0.4"

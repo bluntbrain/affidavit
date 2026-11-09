@@ -68,3 +68,20 @@ jobs:
       - run: zkvm/build-guest.sh
       - run: CARGO_TARGET_DIR=target-blst zkvm/build-guest.sh --features blst
       - run: lez/build-program.sh
+
+  causeway-contracts:
+    name: Causeway vault (Solidity, in-process EVM tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bridge/contracts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: bridge/contracts/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: cat artifacts/gas.json

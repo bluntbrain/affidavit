@@ -735,6 +735,7 @@ dependencies = [
  "affidavit-io",
  "alloy-primitives",
  "hex",
+ "serde_json",
  "sha2",
 ]
 
