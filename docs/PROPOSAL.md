@@ -26,10 +26,10 @@ ishan.lakhwani@gmail.com · Telegram @bluntbrainsol
 **Ishan Lakhwani** (bluntbrain)
 - Social links: [github.com/bluntbrain](https://github.com/bluntbrain) · [bluntbrain.com](https://bluntbrain.com) · [linkedin.com/in/ishanl](https://linkedin.com/in/ishanl) · [x.com/bluntbrain](https://x.com/bluntbrain)
 - Role: everything in this proposal: light client and LEZ program, inclusion proofs and statements, core module, update daemon, CLI, cost measurement, docs
-- Status: full-time for the whole grant
+- Status: full-time for the whole grant. If funded, my Spout Finance role drops to a part-time advisory arrangement already agreed with them; the grant is my primary work for its duration.
 - One accountable engineer who already built and shipped the prototype: a lower total cost to Logos than a multi-person team, with no coordination overhead and a single owner across the light client, the modules and the daemon.
 
-The independent audit (Supportability #8) is done by a third-party firm, scoped and quoted
+The independent audit (Supportability 8) is done by a third-party firm, scoped and quoted
 during the grant so Logos can contract it directly (see Milestones).
 
 ## Project Summary
@@ -72,7 +72,7 @@ execution the submitter proves, while the instance stays public: **one transacti
 about 0.49M gas per update**, where verifying publicly costs 12M to 15M gas split over at
 least two transactions under the 10M cap, and no BLS12-381 precompile is needed. Second,
 private consumers prove their header is in the instance's header accumulator, so the only
-thing they disclose is a root every consumer shares, which is what Functionality #8 asks
+thing they disclose is a root every consumer shares, which is what Functionality 8 asks
 for.
 
 ## Technical Approach
@@ -88,13 +88,13 @@ the way `logos-verified-proxy-module` wraps `libverifproxy`.
 - *Instance*, at the PDA of the hash of its own configuration (chain id, genesis validators
   root, fork schedule, checkpoint, weak-subjectivity limit). There is no reconfiguration
   instruction and could not be one: a different configuration is a different address.
-  Any number coexist; consumers bind to an instance id as a constant (#F9, #F13, #F15).
+  Any number coexist; consumers bind to an instance id as a constant (F9, F13, F15).
 - *Verify*, any actor of the program: checks participation (≥ 342/512), slot ordering,
   that the signing committee is the one the instance tracks, the execution, finality and
   handoff branches, and the aggregate signature; produces an `Advance` that names the
-  state it was computed against. Permissionless (#F11, #VS6).
+  state it was computed against. Permissionless (F11, VS6).
 - *Apply*, on the instance, accepted only from the program's own actors: a
-  compare-and-swap, so duplicates and racing operators change nothing (#R8).
+  compare-and-swap, so duplicates and racing operators change nothing (R8).
 - *Header records*, write-once, and a header accumulator (at most 64 peaks) on the instance.
 
 **Where the update cost lands** ([measured costs](https://github.com/bluntbrain/affidavit/blob/main/docs/COSTS.md)).
@@ -106,21 +106,24 @@ above LEZ's 10M per-transaction cap. LEZ runs private actors uncapped and proven
 sender, with the sequencer verifying one receipt at a fixed 409,764 gas. So the preferred
 path places `Verify` privately: one transaction, about 0.49M gas including `Apply` (57K
 cycles) and the header record (20K), 25 to 30 times less than verifying publicly. The
-submitter proves 15.9M padded cycles into one 222,668-byte succinct receipt (measured: 77
-minutes on a 4-vCPU VM with no GPU; minutes on a GPU or a proving service). The
+submitter proves those 14.6M cycles (15.9M once padded to the prover's 2^20-cycle segments)
+into one 222,668-byte succinct receipt: **measured at 77 minutes on a 4-vCPU VM with no
+GPU**, and 119 minutes end to end as a complete privacy-preserving transaction accepted by a
+running v0.4.0-rc1 sequencer ([`m0/live`](https://github.com/bluntbrain/affidavit/tree/main/m0/live));
+minutes on a GPU or through a proving service. The
 fallback, if testnet 0.4 does not allow that placement, splits the public verification
 along the pairing's seams. M0 settles this on testnet first, and both paths are measured,
-since the comparison is the input to any precompile RFP (#P8).
+since the comparison is the input to any precompile RFP (P8).
 
-**Consumers.** Inclusion and the predicate run in the consumer's own transaction (#F7).
+**Consumers.** Inclusion and the predicate run in the consumer's own transaction (F7).
 Public consumers call a header record. Private consumers call a privately placed actor
 that proves accumulator membership; the only public crossing is `CheckRoot(root)` against
 the instance, which answers for its last 64 roots so private proofs survive a new header
-landing (#R11). Facts: accounts and storage (MPT), logs read from the receipt by index,
+landing (R11). Facts: accounts and storage (MPT), logs read from the receipt by index,
 and native ETH transfers by SSZ proof under the payload's `transactions_root`, sender
 recovery and the receipt's status. Measured: 0.6M to 1.3M cycles per attestation, within
-one transaction (#P1); a private attestation proves in 8.3 minutes on a 4-vCPU cloud VM
-with 9.4 GB of memory, about 2 to 3 minutes on a recent laptop (#P4). Statement identifiers depend on the chain and the fact, never on the
+one transaction (P1); a private attestation proves in 8.3 minutes on a 4-vCPU cloud VM
+with 9.4 GB of memory (measured), an estimated 2 to 3 minutes on a recent laptop (P4). Statement identifiers depend on the chain and the fact, never on the
 instance, so nullifiers survive migration to a replacement instance.
 
 **Reuse** ([assessment](https://github.com/bluntbrain/affidavit/blob/main/docs/REUSE.md)).
@@ -140,7 +143,7 @@ instance before working and again before submitting, and on the private path ann
 20,000 updates: a 300 s window spreads the public-path cost about 20% each and cuts wasted
 submissions 30×; on the private path, hints bring wasted proofs from 400 to 0 per 100
 updates while every operator, laptop or GPU, still lands about a fifth. Hints are never
-trusted; a liar costs bounded delay (#R9, #R10).
+trusted; a liar costs bounded delay (R9, R10).
 
 **Trust** ([trust assumptions](https://github.com/bluntbrain/affidavit/blob/main/docs/TRUST.md)).
 Honest two-thirds of a 512-member committee, which today is not backed by slashing:
@@ -170,10 +173,12 @@ verification exposed through the core module.
    ships before mainnet schedules it.
 3. *Beacon light-client routes through the Logos Ethereum core module*: if the module does
    not expose them, I add them upstream rather than calling beacon nodes around it.
-4. *Proving hardware (#P4, #P6).* A private update proves in minutes on a GPU but takes
-   tens of minutes on a laptop CPU, so operators on the private path use a GPU, a fast
-   desktop or a proving service (outsourcing a proof is trustless), while a private
-   attestation is already practical on a laptop. M0 and M2 measure both on real hardware
+4. *Proving hardware (P4, P6).* A private update takes **77 minutes to prove on a 4-vCPU
+   VM** (measured; 119 minutes end to end as a transaction on a running sequencer), an
+   estimated 20 to 40 minutes on a recent laptop CPU, and minutes on a GPU, so operators on
+   the private path use a GPU, a fast desktop or a proving service (outsourcing a proof is
+   trustless), while a private attestation (8.3 minutes measured) is already practical on a
+   laptop. M0 and M2 measure both on real hardware
    and declare the minimum spec (16 GB of memory today).
 
 ## Milestones, Payout and Timeline
@@ -200,8 +205,8 @@ an on-chain verification script and a mutation test; typed errors.
 **M2 — Attestation, consumers, cost report** · 3 weeks · $7,000
 Public and private consumer paths on testnet; reference consumers (ERC-20 and native ETH to
 a contract) with the recommended consumer pattern; the same contract address across mainnet
-and a testnet (#F5); SPEL IDL; end-to-end tests against a standalone sequencer and Hoodi in
-CI; the full cost report (#P1–#P9) including private proving on a mid-range laptop and the
+and a testnet (F5); SPEL IDL; end-to-end tests against a standalone sequencer and Hoodi in
+CI; the full cost report (P1–P9) including private proving on a mid-range laptop and the
 minimum spec; audit quotes collected.
 
 **M3 — Core module, CLI, update daemon** · 3 weeks · $7,000

@@ -28,17 +28,17 @@ ishan.lakhwani@gmail.com · Telegram @bluntbrainsol
 **Ishan Lakhwani** (bluntbrain)
 - Social links: [github.com/bluntbrain](https://github.com/bluntbrain) · [bluntbrain.com](https://bluntbrain.com) · [linkedin.com/in/ishanl](https://linkedin.com/in/ishanl) · [x.com/bluntbrain](https://x.com/bluntbrain)
 - Role: everything in this proposal — the Ethereum vault, the LEZ bridge and wrapped-token programs, the privacy construction, the Logos core and UI modules, the CLI and relayer, and the cost and privacy test suites. The Ethereum state attestation this bridge consumes is my RFP-021 submission (Affidavit).
-- Status: full-time for the RFP-022 engagement. This is a tier-L, 16–20 week project and I am scoping it as my primary work for that window.
+- Status: full-time for the RFP-022 engagement. This is a tier-L, 16–20 week project and I am scoping it as my primary work for that window. If funded, my Spout Finance role drops to a part-time advisory arrangement already agreed with them; the grant is my primary work for its duration.
 - One accountable engineer across the Ethereum vault, the LEZ programs and the modules: no cross-team hand-offs on a security-critical bridge, and the same person who built the Affidavit core it depends on.
 
-The independent smart-contract audit (Security #1) is scoped during the grant with a firm
+The independent smart-contract audit (Security 1) is scoped during the grant with a firm
 that audits both Solidity and RISC Zero code, for Logos to contract directly (see
 Milestones).
 
 ## Project Summary
 
 A bridge is where bridges get robbed: cross-chain bridges were 64% of the $3.1B stolen
-from DeFi in 2022. Most of that was either a trusted key that got compromised or
+from DeFi protocols in 2022 ([Chainalysis, February 2023](https://www.chainalysis.com/blog/2022-biggest-year-ever-for-crypto-hacking/)). Most of that was either a trusted key that got compromised or
 verification logic that was wrong. Causeway removes the first entirely — no signer,
 federation or relayer is ever trusted with a user's funds — and treats the second as the
 real work: the verification path is fixed at deployment, built on an attestation core that
@@ -47,7 +47,7 @@ is proven on mainnet data and audited once for every LEZ program that reads Ethe
 Causeway is a trustless lock-and-mint bridge. An Ethereum **vault** escrows an ERC-20 or
 native ETH. A LEZ **bridge program** mints the wrapped token only after cryptographically
 verifying the deposit was finalised on Ethereum — using the RFP-021 attestation primitive,
-not its own consensus code (Functionality #3). Burning the wrapped token on LEZ entitles
+not its own consensus code (Functionality 3). Burning the wrapped token on LEZ entitles
 the holder to release the original from the vault, on proof of the burn verified natively
 on Ethereum. Neither leg publishes a link between its two ends: a deposit never names its
 LEZ destination, a burn never names its Ethereum destination, and the only public signals
@@ -60,7 +60,7 @@ ships the cross-zone plumbing for a wrapped token — `wrapped_token`, `bridge`,
 deposit happened. Causeway fills that `None` with a verified Affidavit statement, and does
 it on the **private** attestation path, where the consumer proves its deposit is in the
 instance's header accumulator and discloses only a root every consumer shares. That is what
-makes inbound unlinkability (Privacy Preservation #1) actually hold: the public transaction
+makes inbound unlinkability (Privacy Preservation 1) actually hold: the public transaction
 reveals a nullifier, an amount and a token, never which Ethereum deposit funded the mint.
 
 I have built the attestation core and the seam already:
@@ -83,7 +83,7 @@ The LEZ bridge program, the burn proof and anchor, and the Logos modules are the
 ## Technical Approach
 
 **Stack.** Solidity for the Ethereum vault (prepared for audit, no upgradeable proxy on the
-verification path, per Security #8); Rust LEZ programs on `lee_core` v0.4.0-rc1 reusing
+verification path, per Security 8); Rust LEZ programs on `lee_core` v0.4.0-rc1 reusing
 LEZ's own `wrapped_token` and `cross_zone` crates; the RFP-021 Affidavit primitive for the
 inbound proof; RISC Zero 3.0 (LEZ's own zkVM) for LEZ-side proving, with the burn proof
 wrapped to Groth16 for cheap verification in the vault; the admin authority (RFP-001) for
@@ -93,54 +93,54 @@ off-chain; SPEL for the IDL.
 
 **Inbound — deposit to mint (the private path).**
 1. A user deposits amount *N* of a registered token to the vault. *N* is one of the token's
-   fixed denominations (Privacy #1 baseline). The deposit's only secret is a commitment
+   fixed denominations (Privacy 1 baseline). The deposit's only secret is a commitment
    `c = H(s)` where `s = H(seed, chain, vault, token, nonce)` is derived from the user's own
-   wallet seed and the deployment's coordinates — so the deposit names no LEZ destination (#F2), and the user can rediscover every
+   wallet seed and the deployment's coordinates — so the deposit names no LEZ destination (F2), and the user can rediscover every
    unclaimed deposit by scanning vault events and recomputing `c` from their seed, with no
-   server index and no separately stored secret (#F9).
+   server index and no separately stored secret (F9).
 2. Affidavit attests the deposit: the vault's `Deposit` log (or the ERC-20 `Transfer` to
-   the vault) is included under an Ethereum header finalised to the configured depth (#F12).
+   the vault) is included under an Ethereum header finalised to the configured depth (F12).
 3. The LEZ bridge program mints *N* wrapped to a destination the user chooses at claim
    time, as a **private** LEZ execution. The proof establishes, in zero knowledge: the
    Affidavit statement is valid against the instance's shared accumulator root (one
    `CheckRoot`, the only public crossing); the deposit is to this configuration's vault, of
    a registered token, for denomination *N*; and the one-time nullifier `H(s, id)`, derived from the
    secret and the deposit's identifier, has not been spent. The public transaction shows a nullifier, *N*, and the token — never the deposit
-   or the destination (#Privacy 1, 3). The nullifier keyed on the secret and the statement
-   enforces one-mint-per-deposit (#Reliability 3) without being computable by an observer, and because the destination is bound inside the
-   proof, a relayer who submits the receipt cannot redirect or overcharge (#Security 3).
+   or the destination (Privacy 1, 3). The nullifier keyed on the secret and the statement
+   enforces one-mint-per-deposit (Reliability 3) without being computable by an observer, and because the destination is bound inside the
+   proof, a relayer who submits the receipt cannot redirect or overcharge (Security 3).
 
 This is exactly LEZ's `wrapped_token::MintFrom` authorised by a delivery — but the delivery
 is authorised by an Affidavit statement instead of a trusted `None`.
 
 **Outbound — burn to release.**
 1. The holder burns *N* wrapped on LEZ (private execution), producing a burn record bound to
-   an Ethereum recipient `r` secret-committed from their seed (#F5, #F9), and a nullifier so
-   a burn releases once (#Reliability 3).
+   an Ethereum recipient `r` secret-committed from their seed (F5, F9), and a nullifier so
+   a burn releases once (Reliability 3).
 2. The vault releases *N* of the token to `r` on a proof of the burn, verified **natively on
    Ethereum**: a RISC Zero receipt of the burn, wrapped to Groth16, checked by a verifier
-   fixed in the vault (#F7, #Security 2, 8). The burn must be final on LEZ to the configured
-   depth before release (#F12). This LEZ→Ethereum direction is the bridge's own; RFP-021
+   fixed in the vault (F7, Security 2, 8). The burn must be final on LEZ to the configured
+   depth before release (F12). This LEZ→Ethereum direction is the bridge's own; RFP-021
    covers only Ethereum→LEZ, so the outbound verifier is new work here.
 
 **Why the private path matters for the bridge.** A bridge built on an attestation that
 discloses *which* finalised header it read leaks the deposit's timing-and-block to anyone
 watching, shrinking the anonymity set toward one. Affidavit's accumulator path (RFP-021
-Functionality #8) discloses only a root shared by every consumer of the instance, so the
+Functionality 8) discloses only a root shared by every consumer of the instance, so the
 mint is unlinkable to the deposit beyond amount-token-timing. The two RFPs are designed to
 fit: this is the strongest reason to build them as one body of work.
 
-**Privacy, stated precisely.** Fixed per-token denominations are the baseline (#F8); the
+**Privacy, stated precisely.** Fixed per-token denominations are the baseline (F8); the
 mini-app defaults to them, to delayed submission, and to a permissionless relayer paid out
-of the bridged amount, and shows what each choice would leak (#Usability 5, 6, #Privacy 7).
-Value commitments (Soft #1) are the stronger successor; the vault and accounts are laid out
+of the bridged amount, and shows what each choice would leak (Usability 5, 6, Privacy 7).
+Value commitments (Soft 1) are the stronger successor; the vault and accounts are laid out
 so they can be adopted without redeploying or resetting the accumulated anonymity set, and
 the migration path is documented.
 
 **Governance and safety.** The token registry, caps and finality depth are admin-governed
-via RFP-001; the freeze authority via RFP-002 is independent on each leg (#F14, #Security 5).
-Caps are per-token and global over a rolling window (#F11). The failsafe for a discovered
-verification bug (#Security 9) lets in-flight depositors and burners recover by proving
+via RFP-001; the freeze authority via RFP-002 is independent on each leg (F14, Security 5).
+Caps are per-token and global over a rolling window (F11). The failsafe for a discovered
+verification bug (Security 9) lets in-flight depositors and burners recover by proving
 their own entitlement through the ordinary claim path — never an admin redirect — so the
 failsafe is not a backdoor.
 
@@ -151,19 +151,20 @@ failsafe is not a backdoor.
    the settled-state anchor route (`bridge/docs/OUTBOUND.md`), and measures the real
    verifier gas before the design freezes.
 2. *Fixed denominations vs. fees.* A protocol fee must not re-fingerprint the amount
-   (#F13). I handle fees as separate fixed-denomination flows or value-conserving deductions
+   (F13). I handle fees as separate fixed-denomination flows or value-conserving deductions
    that keep the public amount on the denomination grid; M2 measures the anonymity-set cost.
 3. *Finality on both chains.* Reorg-safe depths each way, configurable, with the residual
-   risk documented (#F12, Design Rationale).
+   risk documented (F12, Design Rationale).
 4. *Position recovery completeness.* Every unclaimed deposit and unreleased burn must be
-   rediscoverable from the seed alone (#F9, #Reliability 5); the recovery scanner is a
+   rediscoverable from the seed alone (F9, Reliability 5); the recovery scanner is a
    first-class deliverable; the derivation and the gap-limited scan already exist in Rust
    and JavaScript with a shared vector and run against real vault logs
    (`bridge/docs/RECOVERY.md`).
 
 ## Milestones, Payout and Timeline
 
-Eighteen weeks of build, inside the RFP's 16–20, plus remediation after the audit. Every
+Seventeen weeks of build (M0–M4), inside the RFP's 16–20, plus a week of audit remediation
+after the report. Every
 milestone is a tagged release with green CI, updated docs and the decision log. This
 assumes the RFP-021 attestation primitive (my companion proposal) is in progress or
 funded; M0 pins the exact interface between them.
@@ -177,26 +178,26 @@ design freeze.
 
 **M1 — Ethereum vault + inbound mint on testnet 0.4** · 4 weeks · $16,000
 The vault hardened from the current contract (deposit, registry, caps, freeze, native ETH +
-USDT-style tokens, #F1, #F17);
+USDT-style tokens, F1, F17);
 the LEZ bridge + wrapped-token programs; the private inbound mint against a live Affidavit
 instance; one-mint-per-deposit and the destination binding under adversarial retry
-(#Reliability 1–3, #Security 2–3). Deployed to a public Ethereum testnet and LEZ testnet 0.4.
+(Reliability 1–3, Security 2–3). Deployed to a public Ethereum testnet and LEZ testnet 0.4.
 
 **M2 — Outbound burn + release, privacy suite** · 4 weeks · $16,000
-The burn path and the vault's native burn-proof verification and release (#F5–F7); fixed
+The burn path and the vault's native burn-proof verification and release (F5–F7); fixed
 denominations, delayed submission, permissionless relayer on by default; the privacy test
 suite (inbound/outbound unlinkability, indistinguishable error paths, full round-trip
-state-diff, #Privacy 1–7); caps, fees and finality depth configurable (#F8, F11–F14).
+state-diff, Privacy 1–7); caps, fees and finality depth configurable (F8, F11–F14).
 
 **M3 — Modules, mini-app, recovery, CLI** · 4 weeks · $16,000
 Logos core module (deposit, claim, redeem, release, recovery, registry read/admin); the
-mini-app and admin UI (#Usability 1, 2); position recovery from seed alone, with its tests
-(#F9, #Reliability 5); the relayer/daemon as a Logos module plus headless CLI; SPEL IDL;
-error messages that reveal nothing (#Usability 8).
+mini-app and admin UI (Usability 1, 2); position recovery from seed alone, with its tests
+(F9, Reliability 5); the relayer/daemon as a Logos module plus headless CLI; SPEL IDL;
+error messages that reveal nothing (Usability 8).
 
 **M4 — Hardening, e2e CI, release, audit-ready** · 3 weeks · $9,000
 End-to-end round-trip tests against a standalone sequencer and an Ethereum fork in CI
-(#Reliability 10); multi-entity independent configurations (#F16); the failsafe (#Security 9);
+(Reliability 10); multi-entity independent configurations (F16); the failsafe (Security 9);
 module catalog release; the deployer, operator and developer docs; audit package.
 
 **M5 — Audit remediation** · 1 week after the report · $4,000
